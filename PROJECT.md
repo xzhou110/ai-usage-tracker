@@ -21,6 +21,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 |---|---|
 | Kind | Personal usage dashboard |
 | Stack | React + TypeScript + Vite, local Node 24 server, Zod, Playwright Core for Cursor |
+| Windows Host | Electron sidebar; launch Start-AI-Usage-Sidebar.vbs after setup |
 | Local Path | `D:/Meaningful/AI/ai-usage-tracker` |
 | Run | npm run build, then npm start; loopback port 8175 |
 | Deploy | Localhost only; source backup excludes all runtime data |
@@ -28,6 +29,8 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Started | 2026-10-05 |
 
 ## 3. Key Things to Know
+- Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native right-edge window with taskbar minimize/restore and optional Stay on Top. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
+- The desktop host uses Electron with a sandboxed renderer and restricted IPC. Browser-only usage remains supported. Closing the sidebar stops only a server it started; minimizing keeps collection running.
 - A chat tool reading usage is not proof of a standalone app integration.
 - Unknown or expired observations must never appear as zero usage or confirmed resets.
 - Do not read conversations, prompts, employer repositories, or unrelated account data.

@@ -1,5 +1,12 @@
 # Decisions
 
+## 2026-10-05 — Windows Sidebar
+- Use a movable right-edge Electron window with standard taskbar minimize/restore and optional session-only Stay on Top. Preserve the full browser dashboard; do not reserve desktop space.
+- Reuse the local server and existing quota semantics. Keep the renderer sandboxed, deny permissions/downloads, validate IPC senders, and restrict external links to known provider pages and the full local dashboard. Follow Electron's official security guidance: https://www.electronjs.org/docs/latest/tutorial/security.
+- Membership and actual billed price are editable locally and explicitly labelled as user entries. Do not invent plan names, prices, unlimited usage, or quotas after a seat upgrade.
+- Minimize keeps the host and collection alive. Close stops only a server started by this desktop instance. A separately started server is never terminated.
+- Verify with existing automated tests plus targeted storage/desktop boundary tests, production browser flows, independent security and UX review, and a clean source checkout. Native control interaction remains an explicit verification gap when native UI tools are unavailable.
+
 ## 2026-10-05 — Proportional Verification
 - Owner approved matching test effort to each request's scope and risk. Routine text, styling, and isolated behavior changes should not trigger the full release process.
 - Use focused checks for small asks; full tests, production build, user journeys, independent QA, and clean-checkout verification for major updates and app completion/release milestones.

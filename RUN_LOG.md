@@ -1,5 +1,9 @@
 # Run Log
 
+- 2026-10-05 — Final sidebar source verified from an isolated staged-tree export: clean npm ci, zero audit vulnerabilities, all 75 tests passing, production assets matching the working build. Real localhost preview confirms the three provider cards with unknown membership values and existing provider coverage; no real metadata was invented. Synthetic QA tabs/server closed.
+
+- 2026-10-05 — Added the Windows sidebar PRD requirement before implementation, native Electron host, local membership/price editor, and clear launchers. Existing quota data and automatic connectors retained. Independent reviews found one dialog completion race; blocked dismissal during saving to fix it. Production browser checks cover compact themes, reload persistence, zero/annual pricing, and 412 draft preservation/reapply. Native startup confirmed; native control/lifecycle interaction remains unverified. No real membership values or account data were entered into tracked files.
+
 - 2026-10-05 — Owner approved proportional verification for all projects. Updated standing instructions, workspace guidance, relevant QA/build skills, and this project's requirements. Documentation-only verification: reviewed diffs, checked saved content and guidance links, removed conflicting blanket triggers, and retained publication privacy gates. No app tests/build, browser tour, or QA agents were needed; sidebar implementation remains paused.
 
 - 2026-10-05 — Orchestrator read workspace and build instructions; classified request as Full Build. Asked about hosting and account plans before selecting architecture.

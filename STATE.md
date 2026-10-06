@@ -1,6 +1,7 @@
 # State
 
 - Phase: Usable local release; live coverage is partial.
+- Added: Native Windows sidebar and local membership/price editing. Sidebar startup confirmed; direct native minimize/restore, pinning, and owned-server shutdown interactions remain unverified because native UI automation is unavailable in this session.
 - Project: D:/Meaningful/AI/ai-usage-tracker. No dependency on legacy software-specific project folders.
 - App: http://127.0.0.1:8175, bound to loopback only.
 - Complete: PRD before code, research, design, contract, three connectors, responsive dashboard, reset timeline, history, Action Required with dismiss/reopen, conflict-safe settings, and production QA.

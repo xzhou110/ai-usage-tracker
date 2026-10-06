@@ -1,0 +1,48 @@
+.usage-sidebar, .membership-dialog { --border: var(--line); --text: var(--ink); }
+.usage-sidebar { max-width: 480px; min-height: 100dvh; margin: 0 auto; padding: 18px 14px; }
+.usage-sidebar-header > div { display: flex; align-items: center; gap: 9px; }
+.usage-sidebar-header h1 { font-size: 20px; margin: 0; letter-spacing: -.5px; }
+.usage-sidebar-header > span { display: block; font-size: 11px; opacity: .65; margin: 6px 0 15px 30px; }
+.usage-sidebar-toolbar { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+.usage-sidebar-toolbar .button { font-size: 11px; padding: 7px 9px; min-height: 31px; }
+.usage-sidebar-toolbar .icon-button { margin-left: auto; }
+.sidebar-accounts { display: grid; gap: 12px; }
+.sidebar-account { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+.sidebar-account > header { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 11px 6px; }
+.sidebar-account-name { display: flex; align-items: center; gap: 9px; }
+.sidebar-account-name h2 { font-size: 16px; margin: 0; }
+.sidebar-account .badge { font-size: 10px; padding: 4px 7px; }
+.sidebar-membership { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: calc(100% - 22px); margin: 0 11px 6px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 7px; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.sidebar-membership > span { min-width: 0; }
+.sidebar-membership strong { display: block; font-size: 12px; overflow-wrap: anywhere; }
+.sidebar-membership small { display: block; font-size: 11px; opacity: .7; margin-top: 3px; }
+.sidebar-membership svg { flex-shrink: 0; }
+.sidebar-quota { padding: 6px 11px; border-top: 1px solid var(--border); }
+.sidebar-quota-title { display: flex; justify-content: space-between; align-items: start; gap: 8px; font-size: 11px; margin-bottom: 5px; }
+.sidebar-quota-title strong { overflow-wrap: anywhere; }
+.sidebar-quota-title > span { text-align: right; flex-shrink: 0; }
+.sidebar-quota .progress-track, .sidebar-quota .unknown-track { height: 5px; }
+.sidebar-quota > p { font-size: 11px; margin: 7px 0 0; }
+.sidebar-reset { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 8px; margin-top: 4px; font-size: 10px; }
+.sidebar-reset time { opacity: .6; }
+.sidebar-quota-empty { padding: 7px 13px 10px; font-size: 11px; }
+.sidebar-quota-empty strong, .sidebar-quota-empty > span { display: block; margin-top: 3px; }
+.sidebar-quota-empty p { opacity: .65; line-height: 1.5; margin: 7px 0 0; }
+.sidebar-account > footer { display: flex; justify-content: space-between; align-items: center; gap: 4px; padding: 2px 8px 2px 11px; border-top: 1px solid var(--border); }
+.sidebar-provider-warning { font-size: 11px; padding: 6px 11px; color: var(--warning); }
+.sidebar-account > footer > span { font-size: 10px; opacity: .7; }
+.sidebar-account > footer > div { display: flex; align-items: center; }
+.sidebar-account > footer .button { min-height: 28px; font-size: 11px; padding: 5px 7px; }
+.usage-sidebar-footer { padding: 14px 0 0; text-align: center; }
+.usage-sidebar-footer .button { width: 100%; font-size: 12px; }
+.usage-sidebar-footer p { font-size: 10px; opacity: .65; line-height: 1.5; }
+.usage-sidebar .notice { padding: 9px; font-size: 12px; margin-bottom: 10px; }
+.membership-dialog { width: min(390px, calc(100vw - 24px)); max-height: calc(100dvh - 30px); overflow: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.membership-dialog::backdrop { background: #15243b99; }
+.membership-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.membership-dialog h2 { font-size: 18px; margin: 0; }
+.membership-dialog p { font-size: 12px; line-height: 1.6; }
+.membership-dialog label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; margin: 14px 0; }
+.membership-dialog input, .membership-dialog select { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: inherit; padding: 10px; font: inherit; }
+.membership-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.membership-dialog footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }

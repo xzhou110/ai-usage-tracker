@@ -4,7 +4,7 @@ import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { SettingsSchema, ProviderIdSchema } from '../shared/schema.ts';
+import { SettingsSchema, ProviderIdSchema, MembershipSchema } from '../shared/schema.ts';
 import type { Connectors, DashboardSnapshot } from '../shared/schema.ts';
 import { AppError } from './errors.ts';
 import { StateStore } from './store.ts';
@@ -172,7 +172,7 @@ export async function startServer(options: ServerOptions) {
       if (get && pathname === '/api/health') {
         providers.checkHealth();
         await store.snapshot();
-        json(response, 200, { ok: true }, head);
+        json(response, 200, { ok: true, app: 'ai-usage-tracker', membershipApi: 1 }, head);
         return;
       }
       if (get && pathname === '/api/status') {
@@ -217,6 +217,17 @@ export async function startServer(options: ServerOptions) {
         return;
       }
       const providerRoute = pathname.match(/^\/api\/providers\/([^/]+)\/(connect|disconnect|refresh)$/);
+      const membershipRoute = pathname.match(/^\/api\/providers\/([^/]+)\/membership$/);
+      if (method === 'PUT' && membershipRoute) {
+        const parsed = ProviderIdSchema.safeParse(membershipRoute[1]);
+        if (!parsed.success) throw new AppError(404, 'NOT_FOUND', 'This provider does not exist.');
+        const expected = expectedRevision(request);
+        const membership = validate(MembershipSchema, await body(request));
+        snapshotResponse(response, await store.transaction(state => {
+          state.providers.find(provider => provider.id === parsed.data)!.membership = membership;
+        }, expected));
+        return;
+      }
       if (method === 'POST' && providerRoute) {
         const parsed = ProviderIdSchema.safeParse(providerRoute[1]);
         if (!parsed.success) throw new AppError(404, 'NOT_FOUND', 'This provider does not exist.');

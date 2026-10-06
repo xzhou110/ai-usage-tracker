@@ -27,6 +27,14 @@ export const SettingsSchema = z.object({
 }).strict();
 export type Settings = z.infer<typeof SettingsSchema>;
 export const defaultSettings: Settings = { timezone: 'America/Los_Angeles', warningPercent: 80, staleAfterMinutes: 15 };
+export const MembershipSchema = z.object({
+  plan: z.string().trim().max(160).nullable(),
+  price: nonnegative.nullable(),
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  billingPeriod: z.enum(['month', 'year', 'unknown']),
+}).strict();
+export type Membership = z.infer<typeof MembershipSchema>;
+export const defaultMembership: Membership = { plan: null, price: null, currency: 'USD', billingPeriod: 'unknown' };
 export const ProviderStateSchema = z.object({
   id: ProviderIdSchema, name: z.enum(['Claude', 'Codex', 'Cursor']),
   mode: z.enum(['automatic', 'passive', 'experimental']),
@@ -35,6 +43,7 @@ export const ProviderStateSchema = z.object({
   freshness: z.enum(['unknown', 'fresh', 'stale']),
   lastAttemptAt: IsoTimeSchema.nullable(), lastSuccessAt: IsoTimeSchema.nullable(), nextRefreshAt: IsoTimeSchema.nullable(),
   message: z.string().max(1000), errorCode: z.string().max(80).nullable(), sourceUrl: z.url(),
+  membership: MembershipSchema.default(() => ({ ...defaultMembership })),
 }).strict();
 export type ProviderState = z.infer<typeof ProviderStateSchema>;
 export const UsageActionSchema = z.object({
@@ -65,6 +74,7 @@ export function initialState(): StoredState {
   return { version:1, settings:{...defaultSettings}, actions:[], providers:providerIds.map(id => ({
     id, ...providerDefinitions[id], status:'disconnected', enabled:false, verified:false, observation:null,
     freshness:'unknown', lastAttemptAt:null, lastSuccessAt:null, nextRefreshAt:null, errorCode:null,
+    membership: { ...defaultMembership },
   })) };
 }
 

@@ -1,5 +1,14 @@
 # AI Usage Tracker Validation
 
+## Windows Sidebar Update
+
+- 75 synthetic tests passed across five files; TypeScript and production build passed. Added exact desktop URL/geometry checks, membership validation/concurrency tests, and a legacy-state test preserving a nonempty quota observation and history.
+- Production synthetic instance on 8176: narrow 400px layout inspected in Light/Dark; theme and membership persisted across reload; zero monthly price and annual price stayed distinct from unknown; a concurrent update returned 412 while preserving the draft, and reapply succeeded. Full Dashboard navigation passed. No unexpected browser console errors before the intentional 412.
+- Independent security review found no must-fix boundary issue. UX review found a pending-save dismissal race, fixed by disabling Cancel/Close/Escape while saving. Legacy history test strengthened and passed.
+- Actual Windows sidebar startup reported ready and started the real local server. Native minimize/restore, pinning, and ownership shutdown interactions are NOT verified: native UI tools are unavailable in this session. Browser checks do not establish those native behaviors.
+- Membership plan and price are user-entered; automatic detection is not claimed. Existing Claude/Cursor coverage limitations below still apply.
+- Clean source verification: exported the staged Git tree to an isolated folder with no ignored state; `npm ci` reported zero vulnerabilities, all 75 tests passed, and the production build produced the same asset hashes as the working project. Temporary browser tabs and the synthetic server were closed afterward. Real sidebar preview saved only under ignored `out/`.
+
 Tested October 5, 2026 on the Windows production app at http://127.0.0.1:8175. Account values, IDs, and configuration contents are intentionally omitted from this tracked report.
 
 ## Result

@@ -19,6 +19,9 @@ try {
   };
   process.once('SIGINT', shutdown);
   process.once('SIGTERM', shutdown);
+  // Only the desktop parent can send this IPC message. No HTTP shutdown endpoint.
+  process.on('message', message => { if (message === 'shutdown') { shutdown(); process.disconnect?.(); } });
+  process.once('disconnect', shutdown);
 } catch (error) {
   console.error(error instanceof AppError ? error.message : 'AI Usage Tracker could not start. Check the local setup and try again.');
   process.exitCode = 1;

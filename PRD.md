@@ -14,6 +14,7 @@ A private local dashboard with three provider cards, a reset timeline, usage his
 Local hosting is preferred because account integrations may need local authentication and the data does not need a public backend. A hosted or multi-user product requires a separate authentication and security design and should not be assumed.
 
 ## Core Requirements
+0. Windows Sidebar: Open a narrow, movable window at the right edge of the current display. Standard Windows controls minimize it to the taskbar and restore it. Keep collection running while minimized. Include all three apps, membership name, actual subscription price and billing period, quota windows, and reset countdowns. Retain the full dashboard. Membership and price can be entered locally; unknown values stay unknown and prices never imply quota. Closing the sidebar stops only a server it started, never a separately running tracker.
 1. Show Claude, Codex, and Cursor independently, including every quota window or pool returned by a verified source.
 2. Show used and remaining percentage when known, source-native amount and unit when available, reset date/time, and live countdown. Never infer a monetary budget from a percentage.
 3. Label each observation with its source, collection time, and freshness. Distinguish Automatic, During Claude Use, Experimental, Disconnected, Stale, and Error states.

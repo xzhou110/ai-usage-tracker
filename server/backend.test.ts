@@ -83,6 +83,40 @@ async function raw(port: number, target: string, headers = '', host = `127.0.0.1
 }
 
 describe('Local HTTP Boundaries', () => {
+  it('saves membership privately with revision protection and never changes quota', async () => {
+    const { app } = await fixture();
+    const before = await getStatus(app);
+    const membership = { plan: 'Synthetic Plan', price: 0, currency: 'USD', billingPeriod: 'month' };
+    const route = '/api/providers/codex/membership';
+    expect((await mutation(app, route, membership, 'PUT')).status).toBe(428);
+    expect((await mutation(app, route, { ...membership, price: -1 }, 'PUT', `"${before.revision}"`)).status).toBe(422);
+    expect((await mutation(app, route, membership, 'PUT', `"${before.revision}"`)).status).toBe(200);
+    expect((await mutation(app, route, { ...membership, price: 20 }, 'PUT', `"${before.revision}"`)).status).toBe(412);
+    const after = await getStatus(app);
+    expect(after.providers[1].membership).toEqual(membership);
+    expect(after.providers.map(provider => provider.observation)).toEqual(before.providers.map(provider => provider.observation));
+    expect(after.providers[0].membership.price).toBeNull();
+  });
+
+  it('reads old state without membership and preserves history and settings on upgrade', async () => {
+    const root = await temporary();
+    const legacy = JSON.parse(JSON.stringify(initialState()));
+    for (const provider of legacy.providers) delete provider.membership;
+    legacy.settings.warningPercent = 91;
+    const oldObservation = observation();
+    legacy.providers[1].observation = oldObservation;
+    await mkdir(path.join(root, 'local', 'history', 'codex'), { recursive: true });
+    await writeFile(path.join(root, 'local', 'history', 'codex', `${oldObservation.id}.json`), JSON.stringify(oldObservation));
+    await writeFile(path.join(root, 'local', 'state.json'), JSON.stringify(legacy));
+    const store = new StateStore(root);
+    await store.initialize(false);
+    cleanup.push(() => store.close());
+    const snapshot = await store.snapshot();
+    expect(snapshot.settings.warningPercent).toBe(91);
+    expect(snapshot.providers.every(provider => provider.membership.plan === null && provider.membership.price === null)).toBe(true);
+    expect(snapshot.providers[1].observation).toEqual(oldObservation);
+    expect((await store.history()).observations).toEqual([oldObservation]);
+  });
   it('starts disconnected without invoking any connector and serves the production surface', async () => {
     const { app, calls } = await fixture();
     const snapshot = await getStatus(app);

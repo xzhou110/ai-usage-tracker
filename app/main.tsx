@@ -7,6 +7,7 @@ import { ActionSummary, ConnectionDialog, ProviderCard, ResetTimeline } from './
 import { ActionsPage, HistoryPage, SettingsPage } from './pages';
 import { dateTime, relativeTime } from './display';
 import './styles.css';
+import { SidebarView } from './SidebarView';
 
 const themeStorageKey = 'ai-usage-tracker-theme';
 function initialTheme(): 'light' | 'dark' {
@@ -14,8 +15,8 @@ function initialTheme(): 'light' | 'dark' {
   return 'light';
 }
 document.documentElement.dataset.theme = initialTheme();
-type Page = 'overview' | 'history' | 'actions' | 'settings';
-function currentPage(): Page { const page = location.hash.slice(1); return page === 'history' || page === 'actions' || page === 'settings' ? page : 'overview'; }
+type Page = 'overview' | 'history' | 'actions' | 'settings' | 'sidebar';
+function currentPage(): Page { const page = location.hash.slice(1); return page === 'history' || page === 'actions' || page === 'settings' || page === 'sidebar' ? page : 'overview'; }
 
 function App() {
   const [page, setPage] = useState<Page>(currentPage);
@@ -102,13 +103,15 @@ function App() {
   const latestObservation = snapshot?.providers.map(provider => provider.observation?.observedAt).filter((at): at is string => !!at).sort().at(-1) ?? null;
   const activeProvider = snapshot?.providers.find(provider => provider.id === connection);
   const setConnection = (id: ProviderId | null) => { setNotice(null); updateConnection(id); };
-  const names = { overview: 'Overview', history: 'Usage History', actions: 'Action Required', settings: 'Settings' };
+  const names = { overview: 'Overview', history: 'Usage History', actions: 'Action Required', settings: 'Settings', sidebar: 'Sidebar' };
+  if (page === 'sidebar') return <><SidebarView snapshot={snapshot} now={now} theme={theme} toggleTheme={toggleTheme} busy={busy} refresh={id => void operation(id, 'refresh')} connect={setConnection} reload={reload} loadError={loadError} notice={notice} />{activeProvider && <ConnectionDialog key={activeProvider.id} provider={activeProvider} onClose={() => setConnection(null)} onOperation={operation} busy={!!busy[activeProvider.id]} error={notice?.error ? notice.text : null} />}</>;
   return <div className="app-shell">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); headingRef.current?.focus(); }}>Skip to Main Content</a>
     <aside className="sidebar">
       <a className="brand" href="#overview" aria-label="AI Usage Tracker Overview"><span className="brand-symbol"><Activity size={22} /></span><span><strong>AI Usage Tracker</strong><small>By XuSeak</small></span></a>
       <div className="sidebar-label">Workspace</div>
       <nav className="primary-navigation" aria-label="Main Navigation">
+        <a href="#sidebar"><LayoutDashboard size={18} /><span>Sidebar View</span></a>
         <a href="#overview" className={page === 'overview' ? 'active' : ''} aria-current={page === 'overview' ? 'page' : undefined}><LayoutDashboard size={18} /><span>Overview</span></a>
         <a href="#history" className={page === 'history' ? 'active' : ''} aria-current={page === 'history' ? 'page' : undefined}><History size={18} /><span>Usage History</span></a>
         <a href="#actions" className={page === 'actions' ? 'active' : ''} aria-current={page === 'actions' ? 'page' : undefined}><CircleAlert size={18} /><span>Action Required</span>{openActions > 0 && <span className="navigation-count">{openActions}</span>}</a>

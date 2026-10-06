@@ -4,6 +4,8 @@ Date: October 5, 2026. Scope: a private Windows application under `D:/Meaningful
 
 ## Architecture Decision
 
+The optional Windows host in `desktop/` uses Electron 44, a sandboxed renderer, isolated narrow preload, validated main-frame IPC, and exact URL allowlists. It serves the existing production UI at `/#sidebar`, starts installed Node 24 hidden only when the loopback port is unused, and gracefully shuts down only its owned child through IPC. A pre-existing compatible server is reused and preserved. Electron is an explicit desktop-runtime download; the Cursor integration continues using installed Chrome. No desktop renderer receives filesystem, process, or arbitrary URL-opening APIs.
+
 Use React + TypeScript + Vite for the browser and Node 24 `node:http` for one loopback server. Use Zod for shared validation and `playwright-core` only for the explicitly connected Cursor browser. Use installed Chrome; do not download a browser. JSON files are the local source of truth. No cloud service, telemetry, database, account token extraction, paid inference, or dependency on legacy project roots is required.
 
 The server owns provider operations, storage, freshness, and action derivation. The UI displays the resulting snapshot and updates countdowns locally every second. A single shared EventSource invalidates the snapshot after changes. Each provider has an independent operation queue, timeout, error state, and refresh schedule; one broken connector cannot hold the others.

@@ -4,6 +4,8 @@ Date: October 5, 2026. Shared types live in `shared/schema.ts`. JSON fields use 
 
 ## Shared Types
 
+Sidebar addition: each provider has `membership: { plan: string | null, price: number | null, currency: string, billingPeriod: 'month' | 'year' | 'unknown' }`. These are user-entered local metadata; price is nonnegative and currency is a three-letter uppercase code. Old state defaults to unknown plan/price, USD, and unknown period without removing observations or history. `PUT /api/providers/:id/membership` validates the complete object and requires the standard mutation headers plus `If-Match`; it returns the updated snapshot or 412 on a stale revision. It never mutates quota. Health now includes the application marker and `membershipApi: 1` so the desktop can reject an incompatible service.
+
 ```ts
 type ProviderId = 'claude' | 'codex' | 'cursor';
 type IsoTime = string;

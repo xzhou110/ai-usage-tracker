@@ -6,7 +6,11 @@ A private Windows dashboard for Claude, Codex, and Cursor quota usage and reset 
 
 With Node 24 installed, run `npm install`, then `npm run build`, then `npm start` from this folder. Installation fetches the app's dependencies; the build produces the browser interface; start serves it on [127.0.0.1:8175](http://127.0.0.1:8175). The server binds only to your machine.
 
-After the first build, double-click **Start-AI-Usage-Tracker.cmd**, or use the **ai-usage-tracker** launch configuration. Keep the server running while using the dashboard; closing it stops collection.
+For the Windows sidebar, run `npm run setup:desktop` once to download the official Electron runtime, then double-click **Start-AI-Usage-Sidebar.vbs** (no terminal window) or **Start-AI-Usage-Tracker.cmd**. `npm run sidebar` does the same from a terminal. On a Windows machine with TLS inspection, set `$env:NODE_USE_SYSTEM_CA='1'` before installation so Node uses Windows' trusted certificates. Setup is already complete on this PC; these commands are for a fresh checkout.
+
+The window opens at the right edge of the current display. Minimize it to the taskbar and restore it normally; collection continues while minimized. **Stay on Top** keeps it above other windows for this session. It can be moved and resized and does not reserve desktop space. **Open Full Dashboard** opens history, settings, and connection details in the browser. Closing the sidebar stops a server it started; a separately started `npm start` server keeps running. The **ai-usage-tracker** launch configuration remains available for browser-only use.
+
+Click a provider's membership row to enter your actual plan, subscription price, currency, and monthly/yearly billing period. These entries remain local and are labelled **Your Entry**. Blank means unknown; 0 means free. Plan names and prices are not automatically detected in this release. They do not change billing or estimate quota. The sidebar shows every provider-reported quota window and reset time; unknown and expired readings remain explicit.
 
 ## Connect Your Apps
 
@@ -26,7 +30,7 @@ History contains collected observations, not reconstructed past usage. Claude's 
 
 ## Privacy and Source Backup
 
-`local/` holds observations, settings, action history, native status-line backup configuration, and the dedicated Cursor browser profile. `private/` and `out/` are also excluded from Git. No conversations, prompts, employer repositories, native credential files, or analytics are collected. Only source code, synthetic tests, and documentation may be committed.
+`local/` holds observations, membership details, settings, action history, native status-line backup configuration, and dedicated browser/desktop profiles. `private/` and `out/` are also excluded from Git. No conversations, prompts, employer repositories, native credential files, or analytics are collected. Only source code, synthetic tests, and documentation may be committed.
 
 Source backup: [Private AI Usage Tracker Repository](https://github.com/xzhou110/ai-usage-tracker). The project and global hooks inspect staged content and original outgoing Git objects, including earlier commits. After cloning for development, run `git config core.hooksPath .githooks` to activate the project gate; the user's global secret scanner must also be installed. This is development setup, not a step needed to use the already-running dashboard.
 

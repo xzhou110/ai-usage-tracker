@@ -1,5 +1,9 @@
 # Consolidated QA Verdict
 
+## Windows Sidebar Follow-Up
+
+The sidebar update received targeted independent security and UX review plus the full automated suite and production browser checks. The one identified dialog race was fixed. Native startup was confirmed; direct Windows controls and server ownership shutdown remain unverified and are disclosed in test-report.md. The original full-dashboard release assessment below does not certify those new native interactions.
+
 Date: October 5, 2026. Product: XuSeak AI Usage Tracker at `D:/Meaningful/AI/ai-usage-tracker`.
 
 ## Release Assessment
