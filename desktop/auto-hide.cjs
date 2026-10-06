@@ -18,32 +18,35 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
   let graceUntil = 0;
   let displayId = null;
   let timer = null;
+  let normalBounds = window.getBounds();
   const wasMaximizable = window.isMaximizable();
   const wasAlwaysOnTop = window.isAlwaysOnTop();
   const state = () => ({ autoHide, hidden });
   const publish = () => { if (!window.isDestroyed()) changed(state()); };
   function area() {
-    return (screen.getAllDisplays().find(display => display.id === displayId) ?? screen.getDisplayMatching(window.getBounds())).workArea;
+    return (screen.getAllDisplays().find(display => display.id === displayId) ?? screen.getDisplayMatching(normalBounds)).workArea;
   }
   function align() {
     if (!autoHide || adjusting || window.isDestroyed() || window.isMinimized() || window.isFullScreen()) return;
     const bounds = window.getBounds();
     const next = upperRightBounds(bounds, area());
+    normalBounds = next;
     if (Object.keys(next).every(key => bounds[key] === next[key])) return;
     adjusting = true;
     try { window.setBounds(next); } finally { adjusting = false; }
   }
   function reveal(focus = false) {
-    if (!autoHide || window.isDestroyed() || window.isMinimized()) return;
+    if (!autoHide || window.isDestroyed() || (window.isMinimized() && !hidden)) return;
     hidden = false; hoverSince = null; outsideSince = null;
     graceUntil = clock.now() + HIDE_DELAY;
-    align(); window.setAlwaysOnTop(true, 'floating');
+    window.setAlwaysOnTop(true, 'floating');
     // Hover reveals without stealing keyboard focus from the user's other app.
     if (focus) window.show(); else window.showInactive();
+    align();
     window.moveTop(); publish();
   }
   function tick() {
-    if (!autoHide || window.isDestroyed() || window.isMinimized() || window.isFullScreen()) return;
+    if (!autoHide || window.isDestroyed() || (window.isMinimized() && !hidden) || window.isFullScreen()) return;
     const now = clock.now();
     const point = screen.getCursorScreenPoint();
     if (hidden) {
@@ -58,22 +61,25 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
     if (outsideSince === null) outsideSince = now;
     if (now - outsideSince >= HIDE_DELAY) {
       hidden = true; hoverSince = null; outsideSince = null;
-      window.hide(); publish();
+      normalBounds = window.getBounds();
+      // Minimize preserves the Windows taskbar recovery path; hide removes it.
+      window.minimize(); publish();
     }
   }
   function shown() {
-    if (!autoHide) return;
+    if (!autoHide || window.isMinimized()) return;
     hidden = false; outsideSince = null; hoverSince = null; graceUntil = clock.now() + HIDE_DELAY;
     align(); window.setAlwaysOnTop(true, 'floating'); publish();
   }
   function moved() {
-    if (adjusting || !autoHide) return;
+    if (adjusting || !autoHide || window.isMinimized()) return;
+    normalBounds = window.getBounds();
     displayId = screen.getDisplayMatching(window.getBounds()).id;
     align(); outsideSince = null; graceUntil = clock.now() + HIDE_DELAY;
   }
   function displayChanged() {
     if (!autoHide) return;
-    const display = screen.getAllDisplays().find(item => item.id === displayId) ?? screen.getDisplayMatching(window.getBounds());
+    const display = screen.getAllDisplays().find(item => item.id === displayId) ?? screen.getDisplayMatching(normalBounds);
     displayId = display.id;
     align();
   }
@@ -87,6 +93,10 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
   });
   return {
     state,
+    minimize() {
+      hidden = false; hoverSince = null; outsideSince = null;
+      window.minimize(); publish();
+    },
     setInteractionHold(value) {
       if (typeof value !== 'boolean') throw new Error('Invalid state.');
       hold = value; outsideSince = null;

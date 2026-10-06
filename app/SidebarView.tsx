@@ -106,7 +106,7 @@ export function SidebarView({ snapshot, now, theme, toggleTheme, busy, refresh, 
     </div>
     {desktop && !currentHost && <p className="sidebar-provider-warning" role="status">Window controls were updated. Close this Windows window and reopen AI Usage Tracker to activate them.</p>}
     {!desktop && <p className="sidebar-preview-note">This is a browser preview. Auto-Hide works in the separate Windows app. Open Start-AI-Usage-Sidebar.vbs from the project folder.</p>}
-    {desktop && windowState?.autoHide && <p className="sidebar-preview-note">Move away to hide. Hover at this monitor’s upper-right corner to reveal. Editing keeps the sidebar open.</p>}
+    {desktop && windowState?.autoHide && <p className="sidebar-preview-note">Move away to hide. Hover at this monitor’s upper-right corner or click the taskbar icon to bring it back. Editing keeps the sidebar open.</p>}
     {(loadError || nativeError) && <div className="notice error" role="alert"><p>{loadError || nativeError}</p>{loadError && <button className="button secondary" onClick={() => void reload()}>Retry</button>}</div>}
     {notice && <div className={`notice ${notice.error ? 'error' : ''}`} role={notice.error ? 'alert' : 'status'}><p>{notice.text}</p></div>}
     {!snapshot ? <p className="sidebar-loading">Loading Your Accounts…</p> : <div className="sidebar-accounts">{snapshot.providers.map(provider => {

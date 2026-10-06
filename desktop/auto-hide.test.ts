@@ -10,12 +10,13 @@ function fixture() {
     isAlwaysOnTop() { return this.pinned; }, setAlwaysOnTop(value: boolean) { this.pinned = value; }, moveTop() {},
     isDestroyed() { return this.destroyed; }, isMinimized() { return this.minimized; }, isFullScreen() { return false; },
     isMaximized() { return this.maximized; }, unmaximize() { this.maximized = false; },
-    restore() { this.minimized = false; this.emit('restore'); },
+    minimize() { this.minimized = true; this.visible = false; this.focused = false; this.emit('minimize'); this.emit('moved'); },
+    restore() { this.minimized = false; this.visible = true; this.emit('restore'); },
     isMaximizable() { return this.maximizable; }, setMaximizable(value: boolean) { this.maximizable = value; },
-    getBounds() { return { ...this.bounds }; }, setBounds(value: typeof this.bounds) { this.bounds = value; this.emit('moved'); },
-    hide() { this.visible = false; this.focused = false; },
-    show() { this.visible = true; this.focused = true; this.emit('show'); },
-    showInactive() { this.visible = true; this.emit('show'); },
+    getBounds() { return this.minimized ? { ...this.bounds, x: -32000, y: -32000 } : { ...this.bounds }; }, setBounds(value: typeof this.bounds) { this.bounds = value; this.emit('moved'); },
+    hide() { throw new Error('Hide removes the taskbar entry.'); },
+    show() { this.minimized = false; this.visible = true; this.focused = true; this.emit('show'); },
+    showInactive() { this.minimized = false; this.visible = true; this.emit('show'); },
   });
   const screen = Object.assign(new EventEmitter(), {
     displays: [{ id: 1, workArea: { x: 0, y: 0, width: 1920, height: 1040 } }],
@@ -38,6 +39,7 @@ describe('Upper-Right Corner Auto-Hide', () => {
     advance(2000); expect(window.visible).toBe(true);
     screen.point = { x: 1000, y: 300 }; advance(800);
     expect(controls.state()).toEqual({ autoHide: true, hidden: true });
+    expect(window.minimized).toBe(true);
     screen.point = { x: 1919, y: 300 }; advance(1000);
     expect(window.visible).toBe(false);
     screen.point = { x: 1919, y: 20 }; advance(100);
@@ -50,7 +52,7 @@ describe('Upper-Right Corner Auto-Hide', () => {
     controls.setAutoHide(true); controls.setInteractionHold(true);
     screen.point = { x: 50, y: 50 }; advance(3000); expect(window.visible).toBe(true);
     controls.setInteractionHold(false); advance(900); expect(window.visible).toBe(false);
-    window.minimized = true; screen.point = { x: 1919, y: 20 }; advance(1000);
+    window.restore(); controls.minimize(); screen.point = { x: 1919, y: 20 }; advance(1000);
     expect(window.visible).toBe(false);
     window.restore(); window.show(); advance(500); expect(window.visible).toBe(true);
   });
@@ -59,8 +61,8 @@ describe('Upper-Right Corner Auto-Hide', () => {
     controls.setAutoHide(true); screen.point = { x: 50, y: 50 }; advance(2000);
     screen.displays = [{ id: 2, workArea: { x: -1280, y: 40, width: 1280, height: 680 } }];
     screen.emit('display-removed');
-    expect(window.bounds).toEqual({ x: -400, y: 40, width: 400, height: 600 });
     screen.point = { x: -1, y: 60 }; advance(300); expect(window.visible).toBe(true);
+    expect(window.bounds).toEqual({ x: -400, y: 40, width: 400, height: 600 });
     controls.setAutoHide(false);
     expect(window.pinned).toBe(false); expect(window.maximizable).toBe(true); expect(polling()).toBe(false);
     window.bounds.x = -1000; window.emit('moved'); expect(window.bounds.x).toBe(-1000);
@@ -69,9 +71,18 @@ describe('Upper-Right Corner Auto-Hide', () => {
   it('supports keyboard/taskbar reopening and cancels polling on close', () => {
     const { window, screen, controls, advance, polling } = fixture();
     controls.setAutoHide(true); screen.point = { x: 50, y: 50 }; advance(2000);
-    window.show(); expect(controls.state().hidden).toBe(false); advance(500); expect(window.visible).toBe(true);
+    window.restore(); expect(controls.state().hidden).toBe(false); advance(500); expect(window.visible).toBe(true);
     expect(() => controls.setAutoHide('true')).toThrow('Invalid state');
     expect(() => controls.setInteractionHold(null)).toThrow('Invalid state');
     window.emit('closed'); expect(polling()).toBe(false);
+  });
+  it('reveals an automatically minimized window when disabling Auto-Hide', () => {
+    const { window, screen, controls, advance, polling } = fixture();
+    controls.setAutoHide(true); screen.point = { x: 50, y: 50 }; advance(2000);
+    expect(window.minimized).toBe(true);
+    controls.setAutoHide(false);
+    expect(window.minimized).toBe(false); expect(window.visible).toBe(true);
+    expect(controls.state()).toEqual({ autoHide: false, hidden: false });
+    expect(polling()).toBe(false);
   });
 });

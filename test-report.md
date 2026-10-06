@@ -1,5 +1,11 @@
 # AI Usage Tracker Validation
 
+## Taskbar Recovery and Price Input Follow-Up
+
+Seven focused desktop tests across two files passed, along with TypeScript and the production build. Regression coverage checks automatic minimization instead of full hiding, corner reveal through inactive show, explicit-minimize suppression, taskbar restore, display removal with minimized-window coordinates, disabling Auto-Hide, and cleanup. These use native-window doubles, not actual Windows interaction.
+
+The production browser price input was focused and visually confirmed without spinner arrows; the dialog was cancelled without changing membership data. Screenshot stays in ignored out/. The previous desktop process was replaced and the updated host reported ready. Actual Windows hover, taskbar icon appearance, click-to-restore, and focus behavior still require user confirmation because native computer control is unavailable. No full-suite or clean-checkout rerun was needed for this isolated fix.
+
 ## Normal-Browser Cursor Connection and Upper-Right Corner Follow-Up
 
 85 tests across seven files and TypeScript/production build passed. The first sandboxed run could not create Windows Git/process/temp fixtures; the normal-permission run passed. Added actual extension-script VM tests plus real-loopback synthetic integration tests for one-use/expiring pairing, exact Host and extension-Origin boundaries, strict quota projection, malformed/oversized/delayed readings, hashed tokens, preservation, restart timestamps, revocation before first read, queued-read rejection, and worker token clearing. Updated native doubles confirm top alignment, corner-only reveal, ordinary-edge rejection, monitor offsets, minimize suppression, and no focus theft.

@@ -47,5 +47,8 @@
 .membership-dialog p { font-size: 12px; line-height: 1.6; }
 .membership-dialog label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; margin: 14px 0; }
 .membership-dialog input, .membership-dialog select { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: inherit; padding: 10px; font: inherit; }
+.membership-dialog input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.membership-dialog input[type="number"]::-webkit-inner-spin-button,
+.membership-dialog input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .membership-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .membership-dialog footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }

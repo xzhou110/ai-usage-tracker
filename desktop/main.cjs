@@ -1,4 +1,5 @@
-const { app, BrowserWindow, screen, ipcMain, shell, dialog, session } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, shell, dialog, session, nativeImage } = require('electron');
+const { createAppIcon } = require('./app-icon.cjs');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 const { ORIGIN, isAppUrl, isExternalUrl, sidebarBounds } = require('./policy.cjs');
@@ -58,7 +59,8 @@ async function start() {
   const area = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea;
   window = new BrowserWindow({
     ...sidebarBounds(area), minWidth: Math.min(340, area.width), minHeight: Math.min(420, area.height),
-    title: 'AI Usage Tracker', autoHideMenuBar: true, show: false,
+    title: 'AI Usage Tracker', autoHideMenuBar: true, show: false, skipTaskbar: false,
+    icon: createAppIcon(nativeImage),
     backgroundColor: '#f6f8fb',
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false },
   });
@@ -75,7 +77,7 @@ async function start() {
   const controls = createWindowControls(window, screen, state => {
     if (!window.webContents.isDestroyed()) window.webContents.send('tracker:window-state', state);
   });
-  ipcMain.handle('tracker:minimize', event => { trusted(event); window.minimize(); });
+  ipcMain.handle('tracker:minimize', event => { trusted(event); controls.minimize(); });
   ipcMain.handle('tracker:window-state', event => { trusted(event); return controls.state(); });
   ipcMain.handle('tracker:auto-hide', (event, value) => { trusted(event); return controls.setAutoHide(value); });
   ipcMain.handle('tracker:interaction-hold', (event, value) => { trusted(event); controls.setInteractionHold(value); });

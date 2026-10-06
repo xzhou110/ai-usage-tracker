@@ -1,6 +1,6 @@
 # State
 
-- Current Window UX: The Auto-Hide button stays in the toolbar. The window docks at the usable upper-right corner and reveals only from that corner's right-edge hotspot. Native synthetic tests cover this; direct pointer interaction remains unverified by the available browser-only tools.
+- Current Window UX: The Auto-Hide button stays in the toolbar. Automatic minimization retains the usage-bars taskbar icon; corner hover or taskbar restore brings it back. Explicit Minimize suspends hover reveal. Subscription Price spinner arrows are removed. Seven focused desktop tests and the production build pass; the price field was visually checked and the desktop restarted. Actual Windows taskbar/hover interaction remains unverified by the available browser-only tools.
 - Cursor Sign-In: Both Google and email human verification failed in the automated browser. Owner confirmed normal-browser sign-in works. Replaced the automated connection with a quota-only browser extension and local pairing. Installation in the owner's browser, real extension-Origin/localhost connectivity, and live reading reconciliation remain pending; do not call Cursor connected until that succeeds.
 
 - Phase: Usable local release; live coverage is partial.
