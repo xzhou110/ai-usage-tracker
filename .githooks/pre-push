@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+export GIT_NO_REPLACE_OBJECTS=1
+PUSH_REFS=$(cat)
+printf '%s\n' "$PUSH_REFS" | node scripts/privacy-gate.mjs --push
+GLOBAL_HOOK="$(git config --global core.hooksPath)/pre-push"
+if [ -f "$GLOBAL_HOOK" ]; then
+  printf '%s\n' "$PUSH_REFS" | sh "$GLOBAL_HOOK" "$@"
+  exit $?
+fi
+echo "Global secret scanner unavailable; push held."
+exit 1

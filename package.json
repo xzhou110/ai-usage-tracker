@@ -1,0 +1,30 @@
+{
+  "name": "ai-usage-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5186 --strictPort",
+    "build": "tsc --noEmit && vite build",
+    "start": "node server/main.ts",
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "test:connectors": "vitest run server/connectors tools"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5",
+    "playwright-core": "^1.58.0",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3"
+  }
+}

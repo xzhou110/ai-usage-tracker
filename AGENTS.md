@@ -1,0 +1,20 @@
+# AI Usage Tracker
+
+Read PROJECT.md and PRD.md first. This project lives directly under D:/Meaningful/AI and must not depend on legacy software-specific project folders.
+
+## Privacy
+- Never read or print local/ or private/ data during agent work. Automated application code can read its own quota storage and its dedicated browser profile; agent diagnostics must print only validation flags and counts.
+- Never read native credential files, conversations, source repositories, or session transcripts for quota collection.
+- Keep real quota observations, account identifiers, browser profiles, screenshots with real account data, and status-line backup configuration under ignored local/ or out/.
+- No paid inference, purchases, reset redemptions, billing changes, or telemetry.
+- Use synthetic fixtures for tests and documentation.
+
+## Implementation
+- Codex: installed app-server account/rateLimits/read, only initialization + quota methods; discard unrelated fields.
+- Claude: supported rate_limits status-line input; capture only quota fields; preserve existing status line.
+- Cursor: explicitly connected dedicated browser session; only quota information; mark experimental until live reconciliation.
+- Never infer zero usage or refreshed allowance from missing data or an expired timestamp.
+- Bind to 127.0.0.1; verify Host, Origin, and mutation header; JSON writes atomic with ETag concurrency protection.
+
+## Validation
+Run tests and production build. Test the real production server and browser before claiming completion. Distinguish fixtures from actual connector validation. Do not start model turns just to test quota.

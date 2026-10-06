@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "ai-usage-tracker", "runtimeExecutable": "node", "runtimeArgs": ["D:/Meaningful/AI/ai-usage-tracker/server/main.ts"], "port": 8175 },
+    { "name": "ai-usage-tracker-dev", "runtimeExecutable": "node", "runtimeArgs": ["D:/Meaningful/AI/ai-usage-tracker/node_modules/vite/bin/vite.js", "D:/Meaningful/AI/ai-usage-tracker", "--host", "127.0.0.1", "--port", "5186", "--strictPort"], "port": 5186 }
+  ]
+}

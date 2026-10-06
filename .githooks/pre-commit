@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+node scripts/privacy-gate.mjs
+GLOBAL_HOOK="$(git config --global core.hooksPath)/pre-commit"
+if [ -f "$GLOBAL_HOOK" ]; then
+  exec sh "$GLOBAL_HOOK"
+fi
+echo "Global secret scanner unavailable; commit held."
+exit 1
