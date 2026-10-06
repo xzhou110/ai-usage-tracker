@@ -30,7 +30,7 @@ These conditions are connection/reconciliation requirements, not fabricated zero
 ## Release Closeout
 
 1. Complete: final full suite 71/71 after replacement-ref hardening; production build passed.
-2. Run the privacy and global secret gates on the exact final staged content and outgoing commits; then verify the private source-backup push. Source publication has not been certified by this critic.
+2. Complete by parent: exact staged and outgoing source passed project privacy and global secret gates. Initial commit 9d64590 was pushed successfully to the private repository. The critic's account-access scope remains read-only synthetic QA.
 3. Complete: STATE.md, PROJECT.md, workspace index, and finding dispositions now reflect local availability, repository, and pending provider reconciliations.
 4. Launcher validated on an isolated empty instance with health HTTP 200; launch configuration points to the production project. The synthetic UI server is stopped. Final browser handoff targets port 8175.
 
