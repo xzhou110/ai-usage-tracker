@@ -22,10 +22,10 @@ export const connectionCopy: Record<ProviderId, { summary: string; limitation: s
   },
   cursor: {
     summary: 'Read Cursor usage through a private browser session.',
-    limitation: 'Experimental browser connection. Refresh after sign-in; automatic collection is not yet verified.',
+    limitation: 'Experimental browser connection. Use Continue with email; Google may reject the automated browser. Refresh after sign-in.',
     what: 'Open Cursor’s official dashboard in a dedicated Chrome profile on this PC. The tracker reads its usage summary and keeps that browser session local.',
     why: 'A personal Cursor account needs an authenticated usage page. This connection is experimental until its readings are reconciled with the official page.',
-    user: 'Sign in and complete any account challenge in the opened browser, then return here and select Refresh Cursor. Only you can complete the sign-in.',
+    user: 'In the opened Cursor window, choose Continue with email and use the email of your existing paid Cursor account. Complete Cursor’s email sign-in yourself, then return here and select Refresh Cursor. Google can block this automation-controlled browser, so do not use Continue with Google here. Only you can access your inbox or complete account verification. If your account requires Google or company SSO, this connector cannot complete that sign-in; use your ordinary browser to view usage instead.',
     action: 'Open Cursor Sign-In',
   },
 };

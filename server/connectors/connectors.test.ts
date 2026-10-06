@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { ObservationSchema } from '../../shared/schema.ts';
 import { CodexConnector, codexAvailabilityMessage, parseCodexPayload } from './codex.ts';
 import { ClaudeConnector } from './claude.ts';
-import { CursorConnector, parseCursorPayload, requestCursorQuotaInPage } from './cursor.ts';
+import { CursorConnector, cursorSignInMessage, parseCursorPayload, requestCursorQuotaInPage } from './cursor.ts';
 import { ConnectorError } from './errors.ts';
 import { projectClaudeInput, writeClaudeProjection } from '../../tools/claude-statusline-bridge.mjs';
 
@@ -264,6 +264,13 @@ describe('Cursor Experimental Quota Projection', () => {
     const connector = new CursorConnector(await temporary());
     expect((await connector.refresh()).waiting).toBe(true);
     await connector.close();
+  });
+  it('explains blocked Google sign-in without leaking URLs or suggesting a security bypass', () => {
+    const message = cursorSignInMessage('https://accounts.google.com/signin?state=synthetic-private-marker');
+    expect(message).toContain('Continue with email');
+    expect(message).toContain('Do not change Google security settings');
+    expect(message).not.toContain('synthetic-private-marker');
+    expect(cursorSignInMessage('https://authenticator.cursor.sh/')).toContain('existing Cursor account');
   });
   it('requests only the fixed endpoint and projects quota before crossing the browser boundary', async () => {
     const response = new Response(JSON.stringify({ individualUsage: { plan: { used: 0, limit: 100, identity: 'synthetic-private-marker' } }, account: 'synthetic-private-marker' }),

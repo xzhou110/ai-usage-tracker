@@ -1,5 +1,7 @@
 # Run Log
 
+- 2026-10-05 — Replaced pin/edge controls with Auto-Hide on Right Edge; added dwell detection, inactive reveal, edit/dialog hold, explicit-minimize suppression, and monitor-change recovery. 47 focused desktop/connector tests and the production build passed. Investigated Google's rejection using official guidance and inspected Cursor's public email sign-in option; updated UI/status guidance without modifying authentication protections. Actual user email authentication and native hover behavior remain unverified.
+
 - 2026-10-05 — Owner reported Stay on Top had no apparent effect in the actual Windows app. Found missing active styling and renderer pin state resetting on reload. Added native state readback/events, explicit On/Off feedback, raise-on-pin and reapply-on-restore, plus independent Stay on Right Edge behavior. Focused desktop tests: six passed; TypeScript/production build passed; old desktop host replaced and new startup confirmed. Native z-order behavior still requires a user check; no browser-only test is claimed as proof.
 
 - 2026-10-05 — Final sidebar source verified from an isolated staged-tree export: clean npm ci, zero audit vulnerabilities, all 75 tests passing, production assets matching the working build. Real localhost preview confirms the three provider cards with unknown membership values and existing provider coverage; no real metadata was invented. Synthetic QA tabs/server closed.

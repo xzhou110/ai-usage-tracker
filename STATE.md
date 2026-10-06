@@ -1,5 +1,8 @@
 # State
 
+- Current Window UX: One Auto-Hide on Right Edge toggle supersedes the earlier pin/edge buttons. Focused synthetic window behavior tests and build pass; direct native hover interaction remains unverified by the available browser-only tools.
+- Cursor Sign-In: Owner encountered Google's automation-browser rejection. Verified Cursor's public sign-in screen offers Continue with email. Updated connection guidance and Google-page status messaging to use the existing Cursor account email. No browser stealth flags, weakened account security, or copied cookies. User email sign-in and live quota reconciliation remain pending.
+
 - Phase: Usable local release; live coverage is partial.
 - Added: Native Windows sidebar and local membership/price editing. Sidebar startup confirmed; direct native minimize/restore, pinning, and owned-server shutdown interactions remain unverified because native UI automation is unavailable in this session.
 - Project: D:/Meaningful/AI/ai-usage-tracker. No dependency on legacy software-specific project folders.

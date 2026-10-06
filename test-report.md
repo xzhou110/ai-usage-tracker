@@ -1,5 +1,9 @@
 # AI Usage Tracker Validation
 
+## Auto-Hide Follow-Up
+
+47 focused desktop/connector tests and TypeScript/production build passed. Auto-hide tests cover pointer exit/edge dwell, reveal without focus, edit holds, explicit minimization, display removal while hidden, release, taskbar/launcher reopening, and timer/listener cleanup using injected native-window doubles. Cursor status tests verify Google rejection guidance does not leak URL parameters. Inspected Cursor's public sign-in screen and confirmed Continue with email exists; no account email or credentials were entered. Native hover behavior and successful email authentication are not established by these tests.
+
 ## Window Controls Follow-Up
 
 The owner reported Stay on Top had no apparent effect in the native app. Fixed missing active feedback and reload state mismatch by reading native state and listening for changes; pinning now also raises the window and reapplies after restore. Added the independent right-edge toggle. Six focused desktop tests passed, covering pin readback/failure, restore, docking across offset displays, resizing, release, cleanup, and invalid commands. TypeScript and production build passed; updated native host startup confirmed. These tests use injected native-window doubles and do not prove real Windows z-order; owner confirmation requested separately.

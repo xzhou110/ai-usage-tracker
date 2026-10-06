@@ -2,7 +2,7 @@ const { app, BrowserWindow, screen, ipcMain, shell, dialog, session } = require(
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 const { ORIGIN, isAppUrl, isExternalUrl, sidebarBounds } = require('./policy.cjs');
-const { createWindowControls } = require('./window-controls.cjs');
+const { createWindowControls } = require('./auto-hide.cjs');
 const root = path.resolve(__dirname, '..');
 app.setName('AI Usage Tracker');
 app.setAppUserModelId('com.xuseak.ai-usage-tracker');
@@ -76,9 +76,9 @@ async function start() {
     if (!window.webContents.isDestroyed()) window.webContents.send('tracker:window-state', state);
   });
   ipcMain.handle('tracker:minimize', event => { trusted(event); window.minimize(); });
-  ipcMain.handle('tracker:pin', (event, value) => { trusted(event); return controls.setPinned(value).pinned; });
   ipcMain.handle('tracker:window-state', event => { trusted(event); return controls.state(); });
-  ipcMain.handle('tracker:right-edge', (event, value) => { trusted(event); return controls.setRightEdge(value); });
+  ipcMain.handle('tracker:auto-hide', (event, value) => { trusted(event); return controls.setAutoHide(value); });
+  ipcMain.handle('tracker:interaction-hold', (event, value) => { trusted(event); controls.setInteractionHold(value); });
   ipcMain.handle('tracker:dashboard', event => { trusted(event); return shell.openExternal(`${ORIGIN}/#overview`); });
   window.once('ready-to-show', () => { window.show(); console.log('AI Usage Tracker sidebar ready.'); });
   await window.loadURL(`${ORIGIN}/#sidebar`);

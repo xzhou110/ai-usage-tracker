@@ -29,7 +29,8 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Started | 2026-10-05 |
 
 ## 3. Key Things to Know
-- Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native window with taskbar minimize/restore and independent Stay on Top / Stay on Right Edge toggles. Controls display native On/Off state. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
+- Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native window with one Auto-Hide on Right Edge toggle. It hides after the pointer leaves, reveals on edge hover without taking focus, and stays visible for editing/dialogs. This replaces the earlier two pin/edge controls. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
+- Cursor: Google sign-in was rejected in the automation-controlled browser. Cursor's current sign-in page offers Continue with email; use the existing account email. Email sign-in and resulting quota still require user verification. Google/SSO-only accounts cannot currently be connected by this adapter.
 - The desktop host uses Electron with a sandboxed renderer and restricted IPC. Browser-only usage remains supported. Closing the sidebar stops only a server it started; minimizing keeps collection running.
 - A chat tool reading usage is not proof of a standalone app integration.
 - Unknown or expired observations must never appear as zero usage or confirmed resets.

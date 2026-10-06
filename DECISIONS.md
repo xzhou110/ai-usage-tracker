@@ -1,5 +1,9 @@
 # Decisions
 
+## 2026-10-05 — Auto-Hide and Cursor Sign-In Guidance
+- Owner replaced the independent pin/edge controls with one right-edge auto-hide mode. Hide the native window fully rather than moving its contents onto a neighboring monitor; reveal after a short edge hover without focusing it. A local pointer-position check runs only while enabled and stores no pointer history. Editing and open dialogs hold the window visible; explicit minimization suppresses hover reveal.
+- Google documents rejecting automation-controlled browsers: https://support.google.com/accounts/answer/7675428. Cursor's current public sign-in page was inspected and offers Continue with email. Guide the user through that existing option using the same account email. This is not proof that email sign-in or quota collection will work for every account. No security bypass or Google-login automation is added.
+
 ## 2026-10-05 — Windows Sidebar
 - Use a movable right-edge Electron window with standard taskbar minimize/restore and optional session-only Stay on Top. Preserve the full browser dashboard; do not reserve desktop space.
 - Reuse the local server and existing quota semantics. Keep the renderer sandboxed, deny permissions/downloads, validate IPC senders, and restrict external links to known provider pages and the full local dashboard. Follow Electron's official security guidance: https://www.electronjs.org/docs/latest/tutorial/security.

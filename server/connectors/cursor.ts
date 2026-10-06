@@ -9,6 +9,13 @@ const DASHBOARD = 'https://cursor.com/dashboard?tab=usage';
 const USAGE_ENDPOINT = 'https://cursor.com/api/usage-summary';
 const verificationDetail = 'Experimental source; reconcile its units and pool labels with the Cursor Spending dashboard. Amounts are converted from reported cents to USD.';
 
+export function cursorSignInMessage(url: string): string {
+  try {
+    if (new URL(url).hostname === 'accounts.google.com') return 'Google can block sign-in in this automation-controlled browser. Select Open Cursor Sign-In again, then Continue with email using your existing Cursor account email. Do not change Google security settings. If your account requires Google or SSO, use your ordinary browser to view usage; this connector cannot complete that login.';
+  } catch { /* An absent or invalid location never supplies quota or diagnostic URLs. */ }
+  return 'Finish signing in to Cursor with Continue with email in its private window, then select Refresh. Use the email of your existing Cursor account.';
+}
+
 export function parseCursorPayload(payload: unknown, now?: string) {
   const data = object(payload);
   const resetAt = instant(data.billingCycleEnd);
@@ -146,7 +153,7 @@ export class CursorConnector implements ProviderConnector {
       await this.page.bringToFront();
     } catch { /* Keep the visible sign-in window; the user can finish provider challenges. */ }
     return { observation: null, waiting: true, verified: false,
-      message: 'A private Cursor window is open. Sign in there, then select Refresh here. Only you can complete the provider sign-in or challenge.' };
+      message: 'A private Cursor window is open. Choose Continue with email using your existing Cursor account email, complete its sign-in, then select Refresh here. Google may block this automation-controlled browser; do not change your Google security settings.' };
   }); }
   refresh(): Promise<ConnectorResult> { return this.serial(async () => {
     if (!this.context) return { observation: null, waiting: true, verified: false,
@@ -154,7 +161,7 @@ export class CursorConnector implements ProviderConnector {
     let page = this.page;
     if (!page || page.isClosed()) page = this.context.pages().find(candidate => candidate.url().startsWith('https://cursor.com/')) ?? null;
     if (!page || new URL(page.url()).origin !== new URL(USAGE_ENDPOINT).origin) return { observation: null, waiting: true, verified: false,
-      message: 'Finish signing in to Cursor in its private window, then select Refresh.' };
+      message: cursorSignInMessage(page?.url() ?? '') };
     this.page = page;
     let deadline: ReturnType<typeof setTimeout> | undefined;
     try {
