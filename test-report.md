@@ -1,5 +1,9 @@
 # AI Usage Tracker Validation
 
+## Window Controls Follow-Up
+
+The owner reported Stay on Top had no apparent effect in the native app. Fixed missing active feedback and reload state mismatch by reading native state and listening for changes; pinning now also raises the window and reapplies after restore. Added the independent right-edge toggle. Six focused desktop tests passed, covering pin readback/failure, restore, docking across offset displays, resizing, release, cleanup, and invalid commands. TypeScript and production build passed; updated native host startup confirmed. These tests use injected native-window doubles and do not prove real Windows z-order; owner confirmation requested separately.
+
 ## Windows Sidebar Update
 
 - 75 synthetic tests passed across five files; TypeScript and production build passed. Added exact desktop URL/geometry checks, membership validation/concurrency tests, and a legacy-state test preserving a nonempty quota observation and history.

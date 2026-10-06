@@ -29,7 +29,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Started | 2026-10-05 |
 
 ## 3. Key Things to Know
-- Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native right-edge window with taskbar minimize/restore and optional Stay on Top. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
+- Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native window with taskbar minimize/restore and independent Stay on Top / Stay on Right Edge toggles. Controls display native On/Off state. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
 - The desktop host uses Electron with a sandboxed renderer and restricted IPC. Browser-only usage remains supported. Closing the sidebar stops only a server it started; minimizing keeps collection running.
 - A chat tool reading usage is not proof of a standalone app integration.
 - Unknown or expired observations must never appear as zero usage or confirmed resets.

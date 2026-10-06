@@ -14,4 +14,9 @@ function sidebarBounds(area) {
   const height = Math.min(900, area.height);
   return { x: area.x + area.width - width, y: area.y, width, height };
 }
-module.exports = { ORIGIN, isAppUrl, isExternalUrl, sidebarBounds };
+function rightEdgeBounds(bounds, area) {
+  const width = Math.min(bounds.width, area.width);
+  const height = Math.min(bounds.height, area.height);
+  return { x: area.x + area.width - width, y: Math.max(area.y, Math.min(bounds.y, area.y + area.height - height)), width, height };
+}
+module.exports = { ORIGIN, isAppUrl, isExternalUrl, sidebarBounds, rightEdgeBounds };

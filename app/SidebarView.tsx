@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Activity, ArrowUpRight, Minus, Moon, Pencil, Pin, RefreshCw, Sun, X } from 'lucide-react';
+import { Activity, ArrowUpRight, Minus, Moon, PanelRight, Pencil, Pin, RefreshCw, Sun, X } from 'lucide-react';
 import type { DashboardSnapshot, Membership, ProviderId, ProviderState } from '../shared/schema';
 import { MembershipSchema } from '../shared/schema';
 import { Badge, ProviderMark, connectionCopy } from './components';
@@ -7,9 +7,10 @@ import { countdown, dateTime, nativeAmount, percentage, providerHealth, relative
 import { errorMessage, request, RequestError } from './api';
 import './sidebar.css';
 
+type WindowState = { pinned: boolean; rightEdge: boolean };
 declare global {
   interface Window {
-    trackerDesktop?: { minimize(): Promise<void>; setPinned(value: boolean): Promise<boolean>; openDashboard(): Promise<void> };
+    trackerDesktop?: { minimize(): Promise<void>; setPinned(value: boolean): Promise<boolean>; openDashboard(): Promise<void>; getWindowState?(): Promise<WindowState>; setRightEdge?(value: boolean): Promise<WindowState>; onWindowState?(callback: (state: WindowState) => void): () => void };
   }
 }
 export function subscriptionPrice(membership: Membership): string {
@@ -63,17 +64,30 @@ export function SidebarView({ snapshot, now, theme, toggleTheme, busy, refresh, 
   reload: () => Promise<DashboardSnapshot | null>; loadError: string; notice: { text: string; error: boolean } | null;
 }) {
   const [editing, setEditing] = useState<ProviderId | null>(null);
-  const [pinned, setPinned] = useState(false);
+  const [windowState, setWindowState] = useState<WindowState | null>(null);
+  const [windowBusy, setWindowBusy] = useState(false);
   const [nativeError, setNativeError] = useState('');
   const desktop = window.trackerDesktop;
+  const currentHost = !!desktop?.getWindowState && !!desktop?.setRightEdge && !!desktop?.onWindowState;
+  useEffect(() => {
+    if (!desktop || !currentHost) return;
+    let active = true;
+    const update = (state: WindowState) => { if (active) setWindowState(state); };
+    const synchronize = () => { void desktop.getWindowState!().then(update).catch(() => { if (active) setNativeError('Unable to read Windows controls. Close and reopen the sidebar.'); }); };
+    const unsubscribe = desktop.onWindowState!(update);
+    synchronize(); window.addEventListener('focus', synchronize);
+    return () => { active = false; unsubscribe(); window.removeEventListener('focus', synchronize); };
+  }, [desktop, currentHost]);
   const membershipProvider = snapshot?.providers.find(provider => provider.id === editing);
-  async function native(action: () => Promise<unknown>) { try { await action(); setNativeError(''); } catch { setNativeError('The window control could not complete. Use the Windows title bar or try again.'); } }
+  async function native(action: () => Promise<unknown>) { setWindowBusy(true); try { await action(); if (currentHost) setWindowState(await desktop!.getWindowState!()); setNativeError(''); } catch { setNativeError('Windows could not apply the control. Close and reopen the sidebar, then try again.'); } finally { setWindowBusy(false); } }
   return <main className="usage-sidebar">
     <header className="usage-sidebar-header"><div><Activity size={21} /><h1>AI Usage Tracker</h1></div><span>By XuSeak · Private on This PC</span></header>
     <div className="usage-sidebar-toolbar"><button className="button secondary" onClick={toggleTheme}>{theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}{theme === 'light' ? 'Dark' : 'Light'}</button>
-      {desktop && <><button className={`button secondary ${pinned ? 'selected' : ''}`} aria-pressed={pinned} onClick={() => void native(async () => setPinned(await desktop.setPinned(!pinned)))}><Pin size={14} />Stay on Top</button><button className="button icon-button" aria-label="Minimize Sidebar" title="Minimize to Taskbar" onClick={() => void native(() => desktop.minimize())}><Minus size={18} /></button></>}
+      {desktop && <><button className="button secondary window-toggle" disabled={windowBusy || !windowState} aria-pressed={windowState?.pinned ?? false} onClick={() => void native(() => desktop.setPinned(!windowState?.pinned))}><Pin size={14} />Stay on Top<span>{windowState ? windowState.pinned ? 'On' : 'Off' : '…'}</span></button><button className="button icon-button" aria-label="Minimize Sidebar" title="Minimize to Taskbar" onClick={() => void native(() => desktop.minimize())}><Minus size={18} /></button><button className="button secondary window-toggle edge-toggle" disabled={windowBusy || !windowState} aria-pressed={windowState?.rightEdge ?? false} onClick={() => void native(async () => setWindowState(await desktop.setRightEdge!(!windowState?.rightEdge)))}><PanelRight size={14} />Stay on Right Edge<span>{windowState ? windowState.rightEdge ? 'On' : 'Off' : '…'}</span></button></>}
       {!desktop && <span className="small-label">Sidebar Preview</span>}
     </div>
+    {desktop && !currentHost && <p className="sidebar-provider-warning" role="status">Window controls were updated. Close this Windows window and reopen AI Usage Tracker to activate them.</p>}
+    {!desktop && <p className="sidebar-preview-note">This is a browser preview. Stay on Top and Stay on Right Edge work in the separate Windows app. Open Start-AI-Usage-Sidebar.vbs from the project folder.</p>}
     {(loadError || nativeError) && <div className="notice error" role="alert"><p>{loadError || nativeError}</p>{loadError && <button className="button secondary" onClick={() => void reload()}>Retry</button>}</div>}
     {notice && <div className={`notice ${notice.error ? 'error' : ''}`} role={notice.error ? 'alert' : 'status'}><p>{notice.text}</p></div>}
     {!snapshot ? <p className="sidebar-loading">Loading Your Accounts…</p> : <div className="sidebar-accounts">{snapshot.providers.map(provider => {

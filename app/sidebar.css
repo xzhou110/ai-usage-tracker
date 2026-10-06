@@ -3,7 +3,12 @@
 .usage-sidebar-header > div { display: flex; align-items: center; gap: 9px; }
 .usage-sidebar-header h1 { font-size: 20px; margin: 0; letter-spacing: -.5px; }
 .usage-sidebar-header > span { display: block; font-size: 11px; opacity: .65; margin: 6px 0 15px 30px; }
-.usage-sidebar-toolbar { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+.usage-sidebar-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 14px; }
+.usage-sidebar-toolbar .window-toggle[aria-pressed='true'] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.window-toggle > span { font-weight: 700; }
+.usage-sidebar-toolbar .edge-toggle { width: 100%; justify-content: flex-start; }
+.usage-sidebar-toolbar .edge-toggle > span { margin-left: auto; }
+.sidebar-preview-note { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
 .usage-sidebar-toolbar .button { font-size: 11px; padding: 7px 9px; min-height: 31px; }
 .usage-sidebar-toolbar .icon-button { margin-left: auto; }
 .sidebar-accounts { display: grid; gap: 12px; }
