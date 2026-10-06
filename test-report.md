@@ -1,5 +1,8 @@
 # AI Usage Tracker Validation
 
+## Windows Launch Discoverability
+
+Installed Start and Desktop shortcuts using the existing Windows Script Host. Verified saved targets, quoted entry-point arguments, and working directories. Re-ran the installer successfully, then confirmed one tracker main process after launching through the installed Start entry. Reviewed the installer and docs diff; no application code changed, so no app suite/build rerun was needed. Native visual launch and Start search indexing remain outside the available browser-only tools. PowerShell execution policy was left unchanged.
 ## Instant Corner Hiding Follow-Up
 
 Eight focused desktop tests passed with TypeScript and the production build. Window doubles verify unchanged corner bounds, retained native visibility without minimization, zero opacity and pointer pass-through while hidden, released keyboard focus, corner reveal, taskbar focus recovery, editing hold, native minimize/restore, disable, display recovery, and cleanup. Removed the duplicate toolbar button and its unused IPC method; reviewed the source diff. Actual Windows visuals and taskbar activation remain unverified because native UI tools are unavailable. This replaces the automatic-minimization approach below, which produced an unwanted Windows animation reported by the owner.

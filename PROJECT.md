@@ -21,7 +21,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 |---|---|
 | Kind | Personal usage dashboard |
 | Stack | React + TypeScript + Vite, local Node 24 server, Zod |
-| Windows Host | Electron sidebar; launch Start-AI-Usage-Sidebar.vbs after setup |
+| Windows Host | Electron sidebar; Start search or Desktop shortcut named AI Usage Tracker |
 | Local Path | `D:/Meaningful/AI/ai-usage-tracker` |
 | Run | npm run build, then npm start; loopback port 8175 |
 | Deploy | Localhost only; source backup excludes all runtime data |
@@ -29,6 +29,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Started | 2026-10-05 |
 
 ## 3. Key Things to Know
+- Everyday launch: use AI Usage Tracker in Windows Start or on the Desktop. Shortcuts target this project; scripts/install-windows-shortcuts.vbs recreates them after setup. The VBS launcher remains a folder-based fallback. Launching again reveals the existing instance; no automatic startup is enabled.
 - Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native window with one Auto-Hide toggle. It hides after the pointer leaves, reveals on upper-right corner hover without taking focus, and stays visible for editing/dialogs. This replaces the earlier two pin/edge controls. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
 - Cursor: Owner confirmed normal-browser sign-in works. The local extension in browser-extension/ reads quota from that signed-in dashboard and pairs to this PC via a one-use code. Updates run every five minutes while the tab is open; sleeping/closed tabs stop them. Install and reconcile before claiming live support. Do not retry automated sign-in, copy cookies, or bypass human verification.
 - The Auto-Hide button stays in its original toolbar position; no duplicate toolbar Minimize button. On pointer exit, the window becomes transparent in place and passes clicks through, releasing keyboard focus without minimizing or animating. It reveals from the upper-right corner's right-edge hotspot (3 by 48 DIP) or taskbar activation. Its usage-bars taskbar icon remains available. Native title-bar Minimize suspends hover reveal. The browser preview shows Auto-Hide disabled.

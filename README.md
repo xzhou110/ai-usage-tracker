@@ -2,11 +2,19 @@
 
 A private Windows dashboard for Claude, Codex, and Cursor quota usage and reset times. Built under the XuSeak brand. All account usage stays on your PC.
 
-## Run Locally
+## Open the App
+
+On this PC, press the **Windows key**, type **AI Usage Tracker**, and open it. The Start shortcut launches the sidebar and starts its local server when needed. You can also double-click **AI Usage Tracker** on your desktop. Neither route needs Codex or a terminal. Opening it again brings the existing app forward.
+
+The app stays in `D:/Meaningful/AI/ai-usage-tracker`; these shortcuts point there. If Start search has not indexed it yet, use the desktop shortcut or double-click **Start-AI-Usage-Sidebar.vbs** in the project folder. To keep a launcher on your taskbar after closing the app, right-click the Start result and choose **Pin to Taskbar** (Windows may put this under **More**). Pinning is an optional personal Windows action; no automatic startup or pinning is configured.
+
+## Set Up a Fresh Checkout
 
 With Node 24 installed, run `npm install`, then `npm run build`, then `npm start` from this folder. Installation fetches the app's dependencies; the build produces the browser interface; start serves it on [127.0.0.1:8175](http://127.0.0.1:8175). The server binds only to your machine.
 
 For the Windows sidebar, run `npm run setup:desktop` once to download the official Electron runtime, then double-click **Start-AI-Usage-Sidebar.vbs** (no terminal window) or **Start-AI-Usage-Tracker.cmd**. `npm run sidebar` does the same from a terminal. On a Windows machine with TLS inspection, set `$env:NODE_USE_SYSTEM_CA='1'` before installation so Node uses Windows' trusted certificates. Setup is already complete on this PC; these commands are for a fresh checkout.
+
+After setup, double-click **scripts/install-windows-shortcuts.vbs** to create or repair current-user Start and Desktop shortcuts. It needs no administrator access, verifies each target, and confirms that the app is available in Start and on the Desktop. Run it after moving or checking out the project elsewhere; it refuses to overwrite a same-named shortcut pointing at another location, so remove that old shortcut first if you intentionally moved the app. These shortcuts launch the desktop executable directly without a terminal window. The installer uses the same Windows Script Host as the existing folder launcher; it does not change PowerShell execution policy.
 
 Turn **Auto-Hide** On using the button in the original toolbar position. The app docks at the current monitor's usable upper-right corner. Move away and it disappears in place after a short delay, without a minimize animation. While invisible it passes clicks through and releases keyboard focus. Hover at that corner's right edge and it reappears above ordinary windows without stealing keyboard focus. The rest of the right edge does not reveal it. Its usage-bars icon remains in the Windows taskbar: select it to bring the app back. Open dialogs and active editing keep it visible. Turning the toggle Off restores a normal movable window. The mode lasts for the current session. The duplicate toolbar Minimize button is removed; the standard title-bar Minimize still suspends hover reveal until you restore the app. Opening the launcher again also brings it back.
 

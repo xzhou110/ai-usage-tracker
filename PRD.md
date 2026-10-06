@@ -14,6 +14,8 @@ A private local dashboard with three provider cards, a reset timeline, usage his
 Local hosting is preferred because account integrations may need local authentication and the data does not need a public backend. A hosted or multi-user product requires a separate authentication and security design and should not be assumed.
 
 ## Core Requirements
+Everyday Launch: Provide a clearly named current-user Windows Start entry and Desktop shortcut, plus a folder launcher fallback. Opening the shortcut starts required local services or restores the existing app without requiring the coding assistant, a terminal, or development setup. Document repair after a folder move. Do not enable startup-at-login or pinning unless requested.
+
 Updated October 5: Keep the Auto-Hide toggle in its original toolbar position. Dock the window at the monitor's usable upper-right corner and reveal it from that corner's right-edge hotspot, rather than anywhere along the edge.
 
 Recovery Update: Auto-Hide must retain a recognizable Windows taskbar icon and disappear instantly at the upper-right corner, without a minimize-to-taskbar animation. Keep the window in place, fully transparent and passing pointer input through while releasing keyboard focus; corner hover or taskbar activation reveals it. Remove the duplicate toolbar Minimize button; the native title-bar Minimize still suspends hover reveal. Subscription Price accepts direct numeric entry without visible spinner arrows.

@@ -1,5 +1,6 @@
 # State
 
+- Everyday Launch: AI Usage Tracker shortcuts are installed in current-user Windows Start and on the Desktop. Both targets and working directories were verified; launching the Start shortcut left one tracker main process running. The repeatable installer is scripts/install-windows-shortcuts.vbs. Start search indexing and native visual presentation are not verified by browser-only tools.
 - Current Window UX: Auto-Hide stays in the toolbar; the duplicate Minimize button is removed. The sidebar becomes transparent and passes clicks through at the upper-right corner without minimizing, retaining its taskbar icon. Corner hover or taskbar activation reveals it. Native title-bar Minimize suspends hover reveal. Eight focused desktop tests and the production build pass. Actual Windows animation/taskbar/hover interaction remains unverified by the available browser-only tools.
 - Cursor Sign-In: Both Google and email human verification failed in the automated browser. Owner confirmed normal-browser sign-in works. Replaced the automated connection with a quota-only browser extension and local pairing. Installation in the owner's browser, real extension-Origin/localhost connectivity, and live reading reconciliation remain pending; do not call Cursor connected until that succeeds.
 
