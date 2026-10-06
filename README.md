@@ -34,6 +34,8 @@ Disconnect stops collection and preserves existing usage history. Claude restora
 
 ## Development and Verification
 
+Choose checks by scope and risk using AGENTS.md. Documentation/text/minor styling receive focused checks; small behavior changes receive relevant tests and workflow verification. Major updates and app completion/release milestones receive the full production QA gate. Security, privacy, authentication, payments, and data-loss risks require deeper targeted tests and independent review even when small. Stop once relevant checks pass; privacy and secret gates always remain enabled.
+
 - `npm test` runs synthetic adapter and isolated server tests without querying your accounts.
 - `npm run build` checks TypeScript and creates the production build.
 - `npm start` runs the production server; this is the instance used for final browser verification.

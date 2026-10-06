@@ -55,7 +55,7 @@ Source: https://prod.cursor.com/help/models-and-usage/usage-limits
 - A5: A connection failure affects only that provider and preserves its last successful observation with a stale/error label.
 - A6: Saved observations and preferences survive a restart; failed writes and concurrent edits cannot silently overwrite data.
 - A7: History distinguishes source observations, resets, missing data, and different window identities.
-- A8: Production build passes unit/integration checks, real browser verification in both themes and narrow layouts, and the prescribed QA sweep with no unresolved must-fix findings.
+- A8: Major updates and app completion/release milestones pass the full relevant suite, production build, main user journeys in both themes and narrow layouts, independent QA, and clean-checkout verification with no unresolved must-fix findings. Smaller asks use focused checks from AGENTS.md; high-risk changes receive deeper targeted tests and independent review regardless of size.
 - A9: Localhost access protections and Git exclusions are verified; no credentials, account identifiers, employer data, or real quota snapshots enter source control.
 - A10: The owner can open the app from a registered launch configuration; connection instructions explain what the user must do, why, and why the app cannot do it for them.
 

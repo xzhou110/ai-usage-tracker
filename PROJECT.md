@@ -38,7 +38,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 Provider adapters normalize quota observations into separate windows. A local server stores observations; the dashboard displays current usage, reset countdowns, freshness, history, and connection actions. Codex uses its installed app-server, Claude uses a passive status-line bridge, and Cursor uses an experimental dedicated browser connection.
 
 ### How to Work on It
-Read PRD.md and STATE.md first. Prove data access before promising automatic collection. Production-build QA and live account reconciliation are required before completion.
+Read PRD.md and STATE.md first. Prove data access before promising automatic collection. Follow the proportional verification tiers in AGENTS.md: focused checks for small asks, full production QA for major updates and app completion/release milestones, and deeper targeted review for high-risk changes. Live reconciliation is required before claiming a connector is verified; unrelated edits do not require repeating it.
 
 ### Current State and Open Items
 Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude's bridge is installed; Cursor's sign-in browser is open. Neither has a live quota reading yet. See test-report.md and STATE.md for precise coverage.

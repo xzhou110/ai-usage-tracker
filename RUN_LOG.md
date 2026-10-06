@@ -1,5 +1,7 @@
 # Run Log
 
+- 2026-10-05 — Owner approved proportional verification for all projects. Updated standing instructions, workspace guidance, relevant QA/build skills, and this project's requirements. Documentation-only verification: reviewed diffs, checked saved content and guidance links, removed conflicting blanket triggers, and retained publication privacy gates. No app tests/build, browser tour, or QA agents were needed; sidebar implementation remains paused.
+
 - 2026-10-05 — Orchestrator read workspace and build instructions; classified request as Full Build. Asked about hosting and account plans before selecting architecture.
 - 2026-10-05 — Opened official Claude, Cursor, and OpenAI documentation. Verified the desktop chat quota tool returns Codex windows; did not save account identifiers or usage values. Standalone access remains unproven.
 - 2026-10-05 — Authored PRD and acceptance criteria before application code. Created project map, decisions, and state. No subagents or paid API calls initiated.

@@ -17,4 +17,9 @@ Read PROJECT.md and PRD.md first. This project lives directly under D:/Meaningfu
 - Bind to 127.0.0.1; verify Host, Origin, and mutation header; JSON writes atomic with ETag concurrency protection.
 
 ## Validation
-Run tests and production build. Test the real production server and browser before claiming completion. Distinguish fixtures from actual connector validation. Do not start model turns just to test quota.
+- Documentation/text/minor styling: read-back/diff or inspect the affected screen; no new tests or QA agents.
+- Small features/isolated bugs: relevant tests and the affected workflow, with type-check/build when applicable. Add a regression test only when it protects meaningful behavior.
+- Major updates, shared architecture changes, app completion, and release milestones: full relevant suite, production build, main user journeys, independent QA, and clean-checkout verification.
+- Security, authentication, permissions, payments, privacy, and data migration/loss: deeper targeted tests and independent review regardless of patch size; broaden if impact crosses the app.
+- Stop once relevant checks pass. Repeat or expand only for new changes, failures, or unresolved risks. Cheap existing suites do not automatically trigger a full QA sweep.
+- Keep privacy/secret publication gates enabled. Report actual checks and material gaps; distinguish fixtures from live connector validation. Never start model turns just to test quota.

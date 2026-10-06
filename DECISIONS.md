@@ -1,5 +1,11 @@
 # Decisions
 
+## 2026-10-05 — Proportional Verification
+- Owner approved matching test effort to each request's scope and risk. Routine text, styling, and isolated behavior changes should not trigger the full release process.
+- Use focused checks for small asks; full tests, production build, user journeys, independent QA, and clean-checkout verification for major updates and app completion/release milestones.
+- Escalate security, privacy, authentication, permissions, payments, and data migration/loss to deeper targeted testing and independent review regardless of patch size. Keep publication privacy/secret gates enabled.
+- Stop once relevant checks pass; repeat or broaden only when new changes, failures, or unresolved risks justify it. Report evidence and gaps without claiming unperformed checks.
+
 ## 2026-10-05 — Full Build With Feasibility First
 - Tier: Full Build under the multi-agent-orchestrator build skill.
 - Draft the PRD before implementation as requested.
