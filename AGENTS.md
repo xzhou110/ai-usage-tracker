@@ -3,7 +3,7 @@
 Read PROJECT.md and PRD.md first. This project lives directly under D:/Meaningful/AI and must not depend on legacy software-specific project folders.
 
 ## Automatic GitHub Backup
-- Owner authorization (October 5, 2026): after completing future project changes, verify proportionately, commit with a clear message, and push to the private xzhou110/ai-usage-tracker repository without asking again. Do not publish unfinished work or unrelated changes.
+- Owner authorization (October 5, 2026): after completing future project changes, verify proportionately, commit with a clear message, and push to the public xzhou110/ai-usage-tracker repository without asking again. Do not publish unfinished work or unrelated changes. Public source does not authorize publishing private runtime data.
 - Keep project privacy and global secret-scanning hooks enabled for every commit/push. Exclude credentials, tokens, cookies, browser profiles, real account/usage data, screenshots, local/, private/, out/, and .env files. If a gate fails, stop publication and report the file/rule without exposing its contents; never bypass it.
 - Confirm the push succeeded. This is source backup only; the app remains private on localhost and is not deployed to GitHub Pages.
 

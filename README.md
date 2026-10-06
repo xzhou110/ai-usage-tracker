@@ -42,7 +42,7 @@ History contains collected observations, not reconstructed past usage. Claude's 
 
 `local/` holds observations, membership details, settings, action history, native status-line backup configuration, and dedicated browser/desktop profiles. `private/` and `out/` are also excluded from Git. No conversations, prompts, employer repositories, native credential files, or analytics are collected. Only source code, synthetic tests, and documentation may be committed.
 
-Source backup: [Private AI Usage Tracker Repository](https://github.com/xzhou110/ai-usage-tracker). The project and global hooks inspect staged content and original outgoing Git objects, including earlier commits. After cloning for development, run `git config core.hooksPath .githooks` to activate the project gate; the user's global secret scanner must also be installed. This is development setup, not a step needed to use the already-running dashboard.
+Public source: [AI Usage Tracker Repository](https://github.com/xzhou110/ai-usage-tracker). Only source and documentation are public; the app runs locally and account data stays on your PC. The project and global hooks inspect staged content and original outgoing Git objects, including earlier commits. After cloning for development, run `git config core.hooksPath .githooks` to activate the project gate; the user's global secret scanner must also be installed. This is development setup, not a step needed to use the already-running dashboard.
 
 Disconnect stops collection and preserves existing usage history. Claude restoration leaves later user edits intact instead of overwriting them. Browser profiles and quota history remain local until you explicitly remove them yourself.
 
