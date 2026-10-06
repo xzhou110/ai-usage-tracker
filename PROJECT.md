@@ -29,6 +29,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Started | 2026-10-05 |
 
 ## 3. Key Things to Know
+- Automatic source backup is authorized: after each completed, proportionately validated change, commit and push to the private GitHub repository without another confirmation. Privacy/secret hooks remain mandatory; credentials and runtime account data stay local. See AGENTS.md.
 - Everyday launch: use AI Usage Tracker in Windows Start or on the Desktop. Shortcuts target this project; scripts/install-windows-shortcuts.vbs recreates them after setup. The VBS launcher remains a folder-based fallback. Launching again reveals the existing instance; no automatic startup is enabled.
 - Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native window with one Auto-Hide toggle. It hides after the pointer leaves, reveals on upper-right corner hover without taking focus, and stays visible for editing/dialogs. This replaces the earlier two pin/edge controls. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
 - Cursor: Owner confirmed normal-browser sign-in works. The local extension in browser-extension/ reads quota from that signed-in dashboard and pairs to this PC via a one-use code. Updates run every five minutes while the tab is open; sleeping/closed tabs stop them. Install and reconcile before claiming live support. Do not retry automated sign-in, copy cookies, or bypass human verification.
