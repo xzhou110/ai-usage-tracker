@@ -1,7 +1,7 @@
 # State
 
-- Current Window UX: One Auto-Hide on Right Edge toggle supersedes the earlier pin/edge buttons. Focused synthetic window behavior tests and build pass; direct native hover interaction remains unverified by the available browser-only tools.
-- Cursor Sign-In: Owner encountered Google's automation-browser rejection. Verified Cursor's public sign-in screen offers Continue with email. Updated connection guidance and Google-page status messaging to use the existing Cursor account email. No browser stealth flags, weakened account security, or copied cookies. User email sign-in and live quota reconciliation remain pending.
+- Current Window UX: The Auto-Hide button stays in the toolbar. The window docks at the usable upper-right corner and reveals only from that corner's right-edge hotspot. Native synthetic tests cover this; direct pointer interaction remains unverified by the available browser-only tools.
+- Cursor Sign-In: Both Google and email human verification failed in the automated browser. Owner confirmed normal-browser sign-in works. Replaced the automated connection with a quota-only browser extension and local pairing. Installation in the owner's browser, real extension-Origin/localhost connectivity, and live reading reconciliation remain pending; do not call Cursor connected until that succeeds.
 
 - Phase: Usable local release; live coverage is partial.
 - Added: Native Windows sidebar and local membership/price editing. Sidebar startup confirmed; direct native minimize/restore, pinning, and owned-server shutdown interactions remain unverified because native UI automation is unavailable in this session.
@@ -10,7 +10,7 @@
 - Complete: PRD before code, research, design, contract, three connectors, responsive dashboard, reset timeline, history, Action Required with dismiss/reopen, conflict-safe settings, and production QA.
 - Codex: Automatic quota reads work. Production readings matched the native desktop source for percentage, window duration, and exact reset instant. No inference call used.
 - Claude: Reversible quota-only bridge installed through the app. Awaiting a supported rate_limits event from normal Claude Code use. Live values remain unverified; idle Claude cannot be refreshed independently.
-- Cursor: Dedicated local Chrome profile opened successfully. User must sign in and select Refresh Cursor. Connector remains experimental and user-triggered; live units/pools and automatic polling remain unverified.
+- Cursor: browser-extension/ is ready for installation after approval. One-use codes expire in ten minutes; stored token hashes bind to the extension Origin. Reads occur every five minutes with an open dashboard tab. Refresh All does not invent a browser reading; use Sync Now in the extension. Revoke Browser Access works before the first reading and preserves history.
 - Verification: See test-report.md and qa-verdict.md. Browser tested desktop/mobile, both themes, history filters, notice lifecycle, keyboard tabs, and concurrent settings edits.
 - Privacy: Only source, synthetic tests, and documentation enter GitHub. Runtime storage, browser profiles, native configuration backup, screenshots, and account metadata remain ignored locally.
-- Open User Steps: Normal Claude activity and Cursor sign-in. No new paid request required for testing.
+- Open User Steps: Normal Claude activity; approve/install the Cursor extension, pair locally, and compare its first reading with the official Spending page. No new paid request required for testing.

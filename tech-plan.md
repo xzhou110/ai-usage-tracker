@@ -6,7 +6,7 @@ Date: October 5, 2026. Scope: a private Windows application under `D:/Meaningful
 
 The optional Windows host in `desktop/` uses Electron 44, a sandboxed renderer, isolated narrow preload, validated main-frame IPC, and exact URL allowlists. It serves the existing production UI at `/#sidebar`, starts installed Node 24 hidden only when the loopback port is unused, and gracefully shuts down only its owned child through IPC. A pre-existing compatible server is reused and preserved. Electron is an explicit desktop-runtime download; the Cursor integration continues using installed Chrome. No desktop renderer receives filesystem, process, or arbitrary URL-opening APIs.
 
-Use React + TypeScript + Vite for the browser and Node 24 `node:http` for one loopback server. Use Zod for shared validation and `playwright-core` only for the explicitly connected Cursor browser. Use installed Chrome; do not download a browser. JSON files are the local source of truth. No cloud service, telemetry, database, account token extraction, paid inference, or dependency on legacy project roots is required.
+Use React + TypeScript + Vite for the browser and Node 24 `node:http` for one loopback server. Use Zod for shared validation. Cursor uses the MV3 extension in browser-extension/ within the user's normal Chrome or Edge; Playwright and its dependency were removed after automated authentication failed. JSON files are the local source of truth. No cloud service, telemetry, database, account token extraction, paid inference, or dependency on legacy project roots is required.
 
 The server owns provider operations, storage, freshness, and action derivation. The UI displays the resulting snapshot and updates countdowns locally every second. A single shared EventSource invalidates the snapshot after changes. Each provider has an independent operation queue, timeout, error state, and refresh schedule; one broken connector cannot hold the others.
 
@@ -28,7 +28,7 @@ Read `api-contract.md` before implementing. Freeze exported names there before p
 - `local/history/<provider>/<observation-id>.json`: one immutable normalized observation per meaningful quota change. No retention cap. List with cursor pagination; a page size limits an HTTP response, not the number of observations saved.
 - `local/claude-inbox.json`: strict quota projection written atomically by the Claude bridge. No raw stdin, session ID, transcript path, working directory, or model text.
 - `local/claude-statusline-backup.json`: original status-line configuration needed for restoration, kept private. Do not expose it through an API or log it.
-- `local/browser-profiles/cursor/`: browser-managed session material. Never export cookies or storage state, attach to the user's normal profile, or send it to the UI.
+- `local/cursor-browser-connection.json`: extension Origin, tracker token hash, and last quota observation. The raw token stays only in trusted local extension storage. The legacy `local/browser-profiles/cursor/` directory is unused and remains private; never inspect/export its cookies or session material.
 - `local/server.lock`: PID/port for the single running instance. Distinguish a stale lock from an active process; do not kill unrelated processes.
 - `out/`: ignored local validation artifacts; real-account screenshots belong here and never in tracked documentation.
 
@@ -54,11 +54,11 @@ Claude is a passive integration: normal Claude Code activity provides observatio
 
 ### Cursor
 
-Connect opens installed Chrome in a visible dedicated ignored profile at the official Cursor dashboard. Only the user can finish the provider's sign-in or challenges. No account collection starts before Connect. Refresh uses the same browser context to issue only `GET https://cursor.com/api/usage-summary`; do not expose arbitrary fetch URLs, account identity, browser automation, or debugging controls to the frontend.
+The owner installs browser-extension/ in normal Chrome or Edge, where sign-in already works. A content script runs only on the signed-in Cursor dashboard and issues the fixed same-origin quota GET after the extension is paired. It does not read DOM, cookies, login fields, or session storage. A normal app-guarded endpoint issues a one-use pairing code; dedicated write-only extension endpoints bind a hashed bearer token to the browser-supplied extension Origin. See api-contract.md for exact guards and browser-extension/README.md for permissions and setup.
 
 Validate the response shape and project quota-only fields before returning to Node. Preserve reported billing-cycle bounds and included/on-demand/team distinctions. Amounts documented by the research parser are cents and must be converted once to USD; percentage fields are already on a 0–100 scale. Do not infer modern pool labels, aggregate disjoint pools, or convert missing values to zero. If current labels cannot be reconciled, display the recognized source field with an explicit verification limitation, not an invented allowance. Treat on-demand spend as a separate money meter; it is not free remaining quota.
 
-Mark this undocumented connector experimental. Initial implementation is user-triggered refresh; background polling is disabled until live account reconciliation validates this version's units/pools and session behavior. Authentication or challenge failures preserve the old observation and offer Reconnect. Serialize browser use, enforce request timeouts/response limits, and close the app-owned browser on Disconnect or server shutdown.
+Mark this undocumented connector experimental until actual installation and live reconciliation validate units/pools. The extension reads at page load, every five minutes while its dashboard tab is open, and on Sync Now. Sleeping/closed tabs stop updates. Server Connect/Refresh only read the saved projection with its original timestamp; Refresh All skips Cursor. Serialize reads, pairing, and revocation; Disconnect rejects further uploads and preserves tracker history. No browser is launched or owned by the app.
 
 ## Time, Freshness, and Actions
 

@@ -17,18 +17,19 @@ export function reconcileActions(state: StoredState, now = new Date()): void {
     const add = (kind: UsageAction['kind'], title: string, description: string, severity: UsageAction['severity'] = 'info', windowKey: string | null = null, cycleId = '') => {
       conditions.push({ identity: identity(provider.id, kind, windowKey ?? '', cycleId), provider: provider.id, windowKey, kind, title, description, severity });
     };
+    const cursorBrowser = provider.id === 'cursor';
     if (!provider.enabled) {
-      add('disconnected', `Connect ${provider.name}`, `Connect ${provider.name} to collect quota updates. Previous observations remain in History.`);
+      add('disconnected', `Connect ${provider.name}`, cursorBrowser ? 'Pair the browser extension in Connection Details, then use Sync Now on the signed-in Cursor dashboard.' : `Connect ${provider.name} to collect quota updates. Previous observations remain in History.`);
       continue;
     }
     if (provider.status === 'waiting') add('waiting', `${provider.name} Is Waiting`, provider.message);
     if (provider.status === 'error') add('error', `${provider.name} Needs Attention`, provider.message, 'warning');
-    if (provider.freshness === 'stale') add('stale', `${provider.name} Data Is Stale`, 'This observation is older than your freshness setting. Refresh or check the source before relying on it.', 'warning');
+    if (provider.freshness === 'stale') add('stale', `${provider.name} Data Is Stale`, cursorBrowser ? 'Keep Cursor’s dashboard tab open and use Sync Now in the extension. Check official usage before relying on this saved reading.' : 'This observation is older than your freshness setting. Refresh or check the source before relying on it.', 'warning');
     for (const window of observation?.windows ?? []) {
       if (window.kind !== 'quota') continue;
       const cycle = window.cycleId ?? window.resetAt ?? 'unknown';
       if (window.resetAt && Date.parse(window.resetAt) <= now.getTime()) {
-        add('awaiting-confirmation', `${provider.name} Reset Needs Confirmation`, `${window.label} reached its recorded reset time. Refresh to confirm the new allowance.`, 'warning', window.key, cycle);
+        add('awaiting-confirmation', `${provider.name} Reset Needs Confirmation`, `${window.label} reached its recorded reset time. ${cursorBrowser ? 'Use Sync Now in the browser extension, or check the official Cursor dashboard.' : 'Refresh to confirm the new allowance.'}`, 'warning', window.key, cycle);
         continue;
       }
       if (window.usedPercent !== null && window.usedPercent >= 100) {

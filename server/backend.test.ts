@@ -11,6 +11,7 @@ import { startServer } from './http.ts';
 import { reconcileActions } from './actions.ts';
 import { StateStore } from './store.ts';
 import { ConnectorError } from './connectors/errors.ts';
+import { CursorConnector } from './connectors/cursor.ts';
 import { acquireLock } from './lock.ts';
 
 const cleanup: (() => Promise<unknown>)[] = [];
@@ -269,25 +270,28 @@ describe('State, Provider, and Action Behavior', () => {
     expect((await getStatus(restarted)).settings.timezone).toBe('UTC');
   });
 
-  it('reopens Cursor after restart while preserving its last observation', async () => {
+  it('waits for the Cursor browser after restart while preserving its last observation', async () => {
     const { root, distDir, app } = await fixture();
     await mutation(app, '/api/providers/cursor/connect');
     const before = await settled(app, 'cursor');
     expect(before.providers[2].status).toBe('connected');
     await app.close();
     const fresh = fakeConnectors();
+    fresh.connectors.cursor = new CursorConnector(root);
     const restarted = await startServer({ root, distDir, port: 0, connectors: fresh.connectors, watch: false, poll: false, throttleMs: 0 });
     cleanup.push(() => restarted.close());
     const waiting = await getStatus(restarted);
-    expect(waiting.providers[2]).toMatchObject({ enabled: true, status: 'waiting', nextRefreshAt: null, observation: before.providers[2].observation });
-    expect(waiting.providers[2].message).toContain('reopen its private browser');
+    expect(waiting.providers[2]).toMatchObject({ enabled: true, status: 'waiting', verified: false, errorCode: null, nextRefreshAt: null, observation: before.providers[2].observation });
+    expect(waiting.providers[2].message).toContain('normal browser');
     expect(fresh.calls.cursor.connect).toBe(0);
     expect(fresh.calls.cursor.refresh).toBe(0);
     const reconnect = await mutation(restarted, '/api/providers/cursor/connect');
     expect(reconnect.status).toBe(202);
     expect((await reconnect.json()).accepted).toBe(true);
-    await settled(restarted, 'cursor');
-    expect(fresh.calls.cursor.connect).toBe(1);
+    const blocked = await settled(restarted, 'cursor', 'waiting');
+    expect(blocked.providers[2]).toMatchObject({ errorCode: null, observation: before.providers[2].observation });
+    await mutation(restarted, '/api/providers/cursor/refresh');
+    expect((await settled(restarted, 'cursor', 'waiting')).providers[2].observation).toEqual(before.providers[2].observation);
   });
 
   it('delegates explicit Cursor reconnect after its browser closes and still serializes duplicate clicks', async () => {

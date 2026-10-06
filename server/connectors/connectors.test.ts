@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { ObservationSchema } from '../../shared/schema.ts';
 import { CodexConnector, codexAvailabilityMessage, parseCodexPayload } from './codex.ts';
 import { ClaudeConnector } from './claude.ts';
-import { CursorConnector, cursorSignInMessage, parseCursorPayload, requestCursorQuotaInPage } from './cursor.ts';
+import { parseCursorPayload } from './cursor.ts';
 import { ConnectorError } from './errors.ts';
 import { projectClaudeInput, writeClaudeProjection } from '../../tools/claude-statusline-bridge.mjs';
 
@@ -259,37 +259,5 @@ describe('Cursor Experimental Quota Projection', () => {
     { billingCycleEnd: '2026-02-30T00:00:00Z', individualUsage: { plan: { used: 0 } } },
     { individualUsage: { plan: { used: 1e308, limit: 1e-308 } } }])('rejects unsupported or ambiguous data without inventing allowances %#', input => {
     expect(() => parseCursorPayload(input)).toThrow(ConnectorError);
-  });
-  it('does not launch or poll a browser before Connect', async () => {
-    const connector = new CursorConnector(await temporary());
-    expect((await connector.refresh()).waiting).toBe(true);
-    await connector.close();
-  });
-  it('explains blocked Google sign-in without leaking URLs or suggesting a security bypass', () => {
-    const message = cursorSignInMessage('https://accounts.google.com/signin?state=synthetic-private-marker');
-    expect(message).toContain('Continue with email');
-    expect(message).toContain('Do not change Google security settings');
-    expect(message).not.toContain('synthetic-private-marker');
-    expect(cursorSignInMessage('https://authenticator.cursor.sh/')).toContain('existing Cursor account');
-  });
-  it('requests only the fixed endpoint and projects quota before crossing the browser boundary', async () => {
-    const response = new Response(JSON.stringify({ individualUsage: { plan: { used: 0, limit: 100, identity: 'synthetic-private-marker' } }, account: 'synthetic-private-marker' }),
-      { status: 200, headers: { 'content-type': 'application/json' } });
-    Object.defineProperty(response, 'url', { value: 'https://cursor.com/api/usage-summary' });
-    const fetch = vi.fn(async () => response); vi.stubGlobal('fetch', fetch);
-    const result = await requestCursorQuotaInPage();
-    expect(fetch).toHaveBeenCalledWith('https://cursor.com/api/usage-summary', expect.objectContaining({ method: 'GET', credentials: 'same-origin', redirect: 'error' }));
-    expect(result).toEqual({ kind: 'ok', payload: { individualUsage: { plan: { used: 0, limit: 100 } } } });
-    expect(JSON.stringify(result)).not.toContain('synthetic-private-marker');
-  });
-  it('treats sign-in, HTML challenge, oversized payload and unsafe numeric types as unavailable', async () => {
-    for (const [status, contentType, body, length] of [[403, 'text/html', 'challenge', ''], [200, 'text/html', 'challenge', ''],
-      [200, 'application/json', '{}', '1000001'], [200, 'application/json', '{"individualUsage":{"plan":{"used":"synthetic-private-marker"}}}', '']] as const) {
-      const response = new Response(body, { status, headers: { 'content-type': contentType, 'content-length': length } });
-      Object.defineProperty(response, 'url', { value: 'https://cursor.com/api/usage-summary' });
-      vi.stubGlobal('fetch', vi.fn(async () => response));
-      const result = await requestCursorQuotaInPage();
-      expect(result.kind).not.toBe('ok'); expect(JSON.stringify(result)).not.toContain('synthetic-private-marker');
-    }
   });
 });

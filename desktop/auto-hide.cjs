@@ -1,8 +1,9 @@
-const { rightEdgeBounds } = require('./policy.cjs');
+const { upperRightBounds } = require('./policy.cjs');
 
 const HOVER_DELAY = 180;
 const HIDE_DELAY = 700;
 const EDGE_WIDTH = 3;
+const CORNER_HEIGHT = 48;
 function contains(point, bounds) {
   return point.x >= bounds.x && point.x < bounds.x + bounds.width && point.y >= bounds.y && point.y < bounds.y + bounds.height;
 }
@@ -27,7 +28,7 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
   function align() {
     if (!autoHide || adjusting || window.isDestroyed() || window.isMinimized() || window.isFullScreen()) return;
     const bounds = window.getBounds();
-    const next = rightEdgeBounds(bounds, area());
+    const next = upperRightBounds(bounds, area());
     if (Object.keys(next).every(key => bounds[key] === next[key])) return;
     adjusting = true;
     try { window.setBounds(next); } finally { adjusting = false; }
@@ -47,7 +48,7 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
     const point = screen.getCursorScreenPoint();
     if (hidden) {
       const workArea = area();
-      const edge = { ...workArea, x: workArea.x + workArea.width - EDGE_WIDTH, width: EDGE_WIDTH };
+      const edge = { x: workArea.x + workArea.width - EDGE_WIDTH, y: workArea.y, width: EDGE_WIDTH, height: Math.min(CORNER_HEIGHT, workArea.height) };
       if (!contains(point, edge)) { hoverSince = null; return; }
       if (hoverSince === null) hoverSince = now;
       if (now - hoverSince >= HOVER_DELAY) reveal();

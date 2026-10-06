@@ -10,6 +10,8 @@ import { AppError } from './errors.ts';
 import { StateStore } from './store.ts';
 import { ProviderService } from './providers.ts';
 import { acquireLock } from './lock.ts';
+import { CursorConnector, parseCursorPayload } from './connectors/cursor.ts';
+import { extensionOrigin } from './connectors/cursor-browser.ts';
 
 export interface ServerOptions {
   root: string;
@@ -83,11 +85,11 @@ function guard(request: IncomingMessage, port: number, devOrigin?: string): void
   }
 }
 
-async function body(request: IncomingMessage): Promise<unknown> {
+async function body(request: IncomingMessage, limit = MAX_BODY_BYTES): Promise<unknown> {
   const declared = request.headers['content-length'];
-  if (declared && Number(declared) > MAX_BODY_BYTES) {
+  if (declared && Number(declared) > limit) {
     request.resume();
-    throw new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds the 1 MB transport limit.');
+    throw new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds its transport size limit.');
   }
   return new Promise((resolve, reject) => {
     let total = 0;
@@ -96,10 +98,10 @@ async function body(request: IncomingMessage): Promise<unknown> {
     request.on('data', (chunk: Buffer) => {
       if (rejected) return;
       total += chunk.length;
-      if (total > MAX_BODY_BYTES) {
+      if (total > limit) {
         rejected = true;
         chunks.length = 0;
-        reject(new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds the 1 MB transport limit.'));
+        reject(new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds its transport size limit.'));
         return;
       }
       chunks.push(chunk);
@@ -163,9 +165,36 @@ export async function startServer(options: ServerOptions) {
     commonHeaders(response);
     const handle = async () => {
       const target = parseTarget(request);
-      guard(request, port, options.devOrigin);
       const pathname = decodeURIComponent(target.pathname);
       const method = request.method ?? 'GET';
+      // Only these two write-only routes accept an extension Origin. The rest of
+      // the application retains the existing same-origin guard unchanged.
+      if (pathname === '/api/cursor-browser/pair' || pathname === '/api/cursor-browser/reading') {
+        const origin = request.headers.origin ?? '';
+        if (request.headers.host !== `127.0.0.1:${port}` || !extensionOrigin.test(origin) || target.search) throw new AppError(403, 'FORBIDDEN', 'This browser request is not allowed.');
+        response.setHeader('Access-Control-Allow-Origin', origin);
+        response.setHeader('Vary', 'Origin');
+        if (method === 'OPTIONS') {
+          response.setHeader('Access-Control-Allow-Methods', 'POST');
+          response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+          response.statusCode = 204; response.end(); return;
+        }
+        if (method !== 'POST' || !/^application\/json(?:\s*;\s*charset\s*=\s*utf-8)?$/i.test(request.headers['content-type'] ?? '')) throw new AppError(403, 'FORBIDDEN', 'Use a JSON browser update.');
+        if (!(options.connectors.cursor instanceof CursorConnector)) throw new AppError(503, 'UNAVAILABLE', 'Cursor browser connection is unavailable.');
+        const browser = options.connectors.cursor.browser;
+        const input = await body(request, 32 * 1024);
+        if (pathname.endsWith('/pair')) {
+          const data = validate(z.object({ code: z.string().regex(/^[a-f0-9]{32}$/) }).strict(), input);
+          json(response, 200, await browser.pair(origin, data.code));
+        } else {
+          const authorization = request.headers.authorization ?? '';
+          const token = /^Bearer ([a-f0-9]{64})$/.exec(authorization)?.[1] ?? '';
+          await browser.accept(origin, token, input, parseCursorPayload, observation => providers.receiveCursor(observation));
+          json(response, 200, { ok: true });
+        }
+        return;
+      }
+      guard(request, port, options.devOrigin);
       const head = method === 'HEAD';
       const get = method === 'GET' || head;
       if (!pathname.startsWith('/api/') && pathname !== '/api') return serveStatic(request, response, target.pathname, options.distDir ?? path.join(projectRoot, 'dist'));
@@ -179,6 +208,12 @@ export async function startServer(options: ServerOptions) {
         const snapshot = await store.snapshot();
         providers.checkHealth();
         snapshotResponse(response, snapshot, head);
+        return;
+      }
+      if (method === 'POST' && pathname === '/api/cursor-browser/pairing') {
+        validate(emptyBody, await body(request));
+        if (!(options.connectors.cursor instanceof CursorConnector)) throw new AppError(503, 'UNAVAILABLE', 'Cursor browser connection is unavailable.');
+        json(response, 200, await options.connectors.cursor.browser.issuePairing());
         return;
       }
       if (get && pathname === '/api/settings') {

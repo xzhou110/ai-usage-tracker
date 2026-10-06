@@ -1,5 +1,15 @@
 # AI Usage Tracker Validation
 
+## Normal-Browser Cursor Connection and Upper-Right Corner Follow-Up
+
+85 tests across seven files and TypeScript/production build passed. The first sandboxed run could not create Windows Git/process/temp fixtures; the normal-permission run passed. Added actual extension-script VM tests plus real-loopback synthetic integration tests for one-use/expiring pairing, exact Host and extension-Origin boundaries, strict quota projection, malformed/oversized/delayed readings, hashed tokens, preservation, restart timestamps, revocation before first read, queued-read rejection, and worker token clearing. Updated native doubles confirm top alignment, corner-only reveal, ordinary-edge rejection, monitor offsets, minimize suppression, and no focus theft.
+
+Two focused independent authentication/privacy and regression reviewers found revocation and error-reporting gaps; all were fixed and rechecked. The production browser preview confirms the button remains in the toolbar, Cursor setup/revocation controls fit a 400px viewport, and no console errors occur. The updated native app started successfully.
+
+Live gaps: the extension has not been installed in the owner's normal browser, so actual Chrome/Edge Origin/localhost behavior and real Cursor quota reconciliation remain unverified. The owner confirmed normal-browser sign-in works. Native pointer/hover behavior cannot be exercised with this session's browser-only tools. Historical email-sign-in guidance below is superseded; it was tried by the owner and failed.
+
+The staged source also passed a clean-folder npm ci (zero audit findings), all 85 tests, and the production build with matching asset hashes. The temporary checkout was removed after verification. Runtime quota/profile data was excluded from the export.
+
 ## Auto-Hide Follow-Up
 
 47 focused desktop/connector tests and TypeScript/production build passed. Auto-hide tests cover pointer exit/edge dwell, reveal without focus, edit holds, explicit minimization, display removal while hidden, release, taskbar/launcher reopening, and timer/listener cleanup using injected native-window doubles. Cursor status tests verify Google rejection guidance does not leak URL parameters. Inspected Cursor's public sign-in screen and confirmed Continue with email exists; no account email or credentials were entered. Native hover behavior and successful email authentication are not established by these tests.

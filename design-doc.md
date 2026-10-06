@@ -33,9 +33,9 @@ Connection setup uses a small dialog or dedicated panel with **What Happens**, *
 |---|---|---|
 | Codex | "Read allowances through your installed Codex CLI. It uses the account already signed in there and does not run a model request." | **Connect Codex** requests quota; missing installation/sign-in produces a clear next step and retry. |
 | Claude | "Send quota readings from Claude Code's supported status line during normal use. This cannot refresh an idle account or independently check Claude's website." | **Set Up Claude Bridge** shows the specific settings change and preserves existing status-line behavior. Until a genuine event arrives, show **Waiting for Claude Use**. If user action is needed, explain that Claude must produce its first quota event and the tracker cannot manufacture it. |
-| Cursor | "Sign in on Cursor's official page in a separate local browser profile. The tracker reads only its usage summary. This connection is experimental until its values match your Spending page." | **Open Cursor Sign-In** launches the provider page; **Check Connection** attempts a bounded read. Only the user can complete sign-in or challenges. Successful parsing alone must not claim reconciliation. |
+| Cursor | "Use the extension in your normal signed-in browser. Pair it to this PC and keep the dashboard tab open for quota updates. Compare the first reading with Spending." | **Connection Details** explains installation and exposes **Generate Pairing Code**, **Open Cursor Dashboard**, and **Revoke Browser Access**, including before the first reading. **Sync Now** lives in the extension popup; Refresh All does not claim to refresh a closed browser. Successful parsing alone does not claim reconciliation. |
 
-Keep the precise automation limitation beside each connector after setup. Cursor profiles and local usage stay on this PC. There is no manual observation form in this release; disconnected or unsupported sources stay explicit.
+Keep the precise automation limitation beside each connector after setup. Cursor credentials remain in the normal browser; only projected quota reaches this local tracker. Sleeping/closed dashboard tabs stop updates. There is no manual observation form in this release; disconnected or unsupported sources stay explicit.
 
 ## History and Action Required
 

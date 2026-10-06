@@ -123,7 +123,17 @@ All API responses have `Cache-Control: no-store`. Every mutation below requires 
 | `GET /api/events` | One shared browser EventSource | SSE `change` event with `{"revision":"..."}`; heartbeat comments |
 | `GET /api/health` | None | `200 {"ok":true}`; no account, path, or process details |
 
-Connection/refresh operations return promptly and are serialized per provider. Connect is idempotent while already connected/connecting. For Cursor, Connect brings its dedicated browser forward for sign-in; the UI then offers Refresh after sign-in. Refresh never auto-enables a provider. For Claude, Refresh imports the latest bridge projection but does not claim new source freshness. A duplicate queued operation may return accepted false with an explanation; it is not a second concurrent collector.
+Connection/refresh operations return promptly and are serialized per provider. Connect is idempotent while already connected/connecting. Cursor Connect/Refresh read only the last paired-browser observation and never open a login window or manufacture a new timestamp. Refresh All excludes Cursor and directs the user to Sync Now in the extension. Refresh never auto-enables a provider. For Claude, Refresh imports the latest bridge projection but does not claim new source freshness. A duplicate queued operation may return accepted false with an explanation; it is not a second concurrent collector.
+
+### Cursor Browser Extension Routes
+
+`POST /api/cursor-browser/pairing` uses the ordinary app guard and an empty JSON body. It returns a 128-bit one-use code and `expiresAt`, ten minutes later. Keep this response out of logs and screenshots; a newer code replaces the pending one.
+
+Only `POST /api/cursor-browser/pair` and `/api/cursor-browser/reading` accept cross-origin writes. They require exact `Host: 127.0.0.1:<port>`, a browser-supplied `chrome-extension://<32-letter-id>` Origin, JSON, and a 32 KB projected-message transport limit. Their OPTIONS handlers advertise only POST plus Content-Type/Authorization. No other route receives extension CORS permissions.
+
+- Pair takes strict `{ code }`, consumes it once, binds a random 256-bit bearer to that Origin, and returns `{ token }` only to the extension. The server persists its hash, never its raw value.
+- Reading requires that bearer and bound Origin. It takes strict `{ observedAt, payload }`; payload contains only numeric/null quota pools and billing-cycle timestamps. A source timestamp more than one minute away from this machine's current time is rejected. Unknown fields or unsupported quota shapes return safe 422 errors. Success persists a normalized observation and enables Cursor with `verified: false`.
+- Disconnect serializes with incoming reads, clears local browser authorization and pending pairing codes, and preserves tracker history. Revocation is available even before the first accepted reading. The extension drops a revoked token after a 403.
 
 The frontend always refetches status after operations and SSE changes. Update countdowns locally without a network request each second. Reconcile server clock offset from serverTime. Preserve scroll/focus during refresh. Theme is an explicit Light/Dark localStorage preference, separate from data settings.
 

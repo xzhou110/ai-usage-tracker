@@ -1,0 +1,6 @@
+:root { font-family: system-ui, sans-serif; color: #17253c; background: #f6f8fb; color-scheme: light; }
+body { width: 300px; margin: 0; padding: 18px; } h1 { font-size: 18px; margin: 0; } h2 { font-size: 14px; }
+p { font-size: 12px; line-height: 1.5; } label { display: block; font-size: 12px; font-weight: 600; }
+input { box-sizing: border-box; width: 100%; padding: 9px; margin: 5px 0 9px; border: 1px solid #bbc6d7; border-radius: 6px; }
+button { padding: 9px 12px; background: #2459a7; color: white; border: 0; border-radius: 6px; cursor: pointer; } button:disabled { opacity: .55; cursor: wait; }
+#sync { margin-top: 10px; } .help { color: #59697f; } :focus-visible { outline: 2px solid #3981ef; outline-offset: 3px; }

@@ -463,3 +463,9 @@ input[aria-invalid='true'] { border-color: var(--danger); }
 .button.icon-button { width: 44px; }
 .button.profile-button { min-height: 44px !important; min-width: 44px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+.browser-setup ol { padding-left: 20px; font-size: 13px; line-height: 1.6; }
+.browser-setup li { margin-bottom: 10px; }
+.browser-setup code { overflow-wrap: anywhere; }
+.pairing-code { display: grid; gap: 7px; margin-top: 14px; font-size: 12px; }
+.pairing-code input { min-width: 0; width: 100%; padding: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-family: monospace; }
+.pairing-code small { line-height: 1.5; }

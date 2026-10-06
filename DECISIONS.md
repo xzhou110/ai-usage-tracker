@@ -1,6 +1,17 @@
 # Decisions
 
-## 2026-10-05 — Auto-Hide and Cursor Sign-In Guidance
+## 2026-10-05 — Normal-Browser Cursor Connection and Upper-Right Hiding
+- Owner confirmed sign-in works in normal Chrome/Edge. Replace automated login with a local MV3 extension, isolated quota-only content script, and a one-use pairing code. Only two write-only localhost routes accept extension Origins; tokens are hashed locally and bound to that Origin. No cookies API, browser credential copying, or remote telemetry.
+- Keep the signed-in dashboard tab open for five-minute reads; disclose browser sleeping/closure. Installation and live reconciliation remain required. Use the official Chrome extension network/storage model: https://developer.chrome.com/docs/extensions/develop/concepts/network-requests and https://developer.chrome.com/docs/extensions/reference/api/storage .
+- Owner clarified that the button stays in its toolbar; the window belongs at the upper-right corner. The reveal hotspot covers the first 48 DIP of the usable right edge, with the existing 3 DIP width and deliberate hover delay. Other edge positions do not reveal the window.
+
+## 2026-10-05 — Stop the Blocked Cursor Login Flow (Replaced by Extension)
+- Owner's email sign-in failed too, with Cursor human-verification errors. An actual tracker Refresh still returned no authenticated reading. The earlier email workaround below is superseded.
+- Cloudflare explicitly excludes automated browsers/frameworks from supported production challenge environments: https://developers.cloudflare.com/cloudflare-challenges/reference/supported-browsers/ . Disable the automated connection rather than send the owner through repeated retries.
+- Keep unknown/error states and previous observations; link to the official dashboard in the default browser from the Windows app. This navigation is not a tracker connection. Confirm normal-browser access before designing a replacement bridge. No stealth, cookie copying, or security changes.
+- The initial interpretation of moving the button was superseded by the owner's clarification above.
+
+## 2026-10-05 — Auto-Hide and Cursor Sign-In Guidance (Superseded for Cursor)
 - Owner replaced the independent pin/edge controls with one right-edge auto-hide mode. Hide the native window fully rather than moving its contents onto a neighboring monitor; reveal after a short edge hover without focusing it. A local pointer-position check runs only while enabled and stores no pointer history. Editing and open dialogs hold the window visible; explicit minimization suppresses hover reveal.
 - Google documents rejecting automation-controlled browsers: https://support.google.com/accounts/answer/7675428. Cursor's current public sign-in page was inspected and offers Continue with email. Guide the user through that existing option using the same account email. This is not proof that email sign-in or quota collection will work for every account. No security bypass or Google-login automation is added.
 

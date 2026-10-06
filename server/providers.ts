@@ -1,8 +1,9 @@
-import type { Connectors, ConnectorResult, ProviderId, ProviderOperation } from '../shared/schema.ts';
+import type { Connectors, ConnectorResult, Observation, ProviderId, ProviderOperation } from '../shared/schema.ts';
 import { providerIds, providerDefinitions } from '../shared/schema.ts';
 import { AppError } from './errors.ts';
 import { StateStore, sameQuota, validateObservation } from './store.ts';
 import { ConnectorError } from './connectors/errors.ts';
+import { CURSOR_BROWSER_GUIDANCE } from './connectors/cursor.ts';
 
 type Operation = 'connect' | 'refresh';
 
@@ -31,9 +32,9 @@ export class ProviderService {
     await this.store.transaction(state => {
       for (const provider of state.providers) {
         if (provider.enabled && provider.id === 'cursor') {
-          // The browser belongs to this process, even though its profile persists on disk.
           provider.status = 'waiting';
-          provider.message = 'Reconnect Cursor to reopen its private browser. Your last observation is preserved.';
+          provider.verified = false;
+          provider.message = CURSOR_BROWSER_GUIDANCE;
           provider.errorCode = null;
           provider.nextRefreshAt = null;
         } else if (provider.enabled && provider.status === 'connecting') {
@@ -79,8 +80,8 @@ export class ProviderService {
       await this.store.transaction(state => {
         const provider = state.providers.find(item => item.id === providerId)!;
         if (operation === 'refresh' && !provider.enabled) throw new AppError(409, 'CONFLICT', 'Connect this provider before refreshing.');
-        // Cursor's browser can be closed independently of its last saved quota status.
-        // Explicit Connect must let the connector reopen or foreground that browser.
+        // An explicit experimental reconnect must reach the connector so an
+        // unavailable integration can report its current limitation.
         if (operation === 'connect' && provider.enabled && (provider.status === 'connecting' || provider.status === 'connected' && providerId !== 'cursor')) { skip = true; return; }
         if (operation === 'connect') {
           provider.enabled = true;
@@ -149,7 +150,25 @@ export class ProviderService {
 
   async refreshAll(): Promise<ProviderOperation[]> {
     const snapshot = await this.store.snapshot();
-    return Promise.all(snapshot.providers.map(provider => provider.enabled ? this.request(provider.id, 'refresh') : Promise.resolve({ provider: provider.id, accepted: false, message: 'Connect this provider before refreshing.' })));
+    return Promise.all(snapshot.providers.map(provider => provider.id === 'cursor'
+      ? Promise.resolve({ provider: provider.id, accepted: false, message: CURSOR_BROWSER_GUIDANCE })
+      : provider.enabled ? this.request(provider.id, 'refresh') : Promise.resolve({ provider: provider.id, accepted: false, message: 'Connect this provider before refreshing.' })));
+  }
+
+  async receiveCursor(observation: Observation): Promise<void> {
+    if (this.stopped) throw new AppError(503, 'UNAVAILABLE', 'The tracker is shutting down.');
+    if (this.reserved.has('cursor')) throw new AppError(409, 'CONFLICT', 'A Cursor update is in progress. Sync again in a moment.');
+    validateObservation(observation, 'cursor');
+    this.reserved.add('cursor');
+    try {
+      await this.store.transaction(async state => {
+        const provider = state.providers.find(item => item.id === 'cursor')!;
+        provider.observation = await this.store.saveObservation(state, observation);
+        provider.enabled = true; provider.status = 'connected'; provider.verified = false;
+        provider.message = 'Quota received from your paired browser extension. Experimental: compare these readings with Cursor Spending.';
+        provider.errorCode = null; provider.lastAttemptAt = observation.receivedAt; provider.lastSuccessAt = observation.observedAt; provider.nextRefreshAt = null;
+      });
+    } finally { this.reserved.delete('cursor'); }
   }
 
   async disconnect(providerId: ProviderId) {

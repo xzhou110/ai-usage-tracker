@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "AI Usage Tracker — Cursor Connection",
+  "version": "0.1.0",
+  "description": "Send quota-only readings from your signed-in Cursor dashboard to AI Usage Tracker on this PC.",
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_title": "AI Usage Tracker", "default_popup": "popup.html" },
+  "content_scripts": [{
+    "matches": ["https://cursor.com/dashboard*"],
+    "js": ["quota-reader.js", "content.js"],
+    "run_at": "document_idle",
+    "all_frames": false,
+    "world": "ISOLATED"
+  }]
+}

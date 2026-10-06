@@ -68,7 +68,7 @@ export interface ApiError { error: { code: string; message: string } }
 export const providerDefinitions = {
   claude: { name: 'Claude', mode: 'passive', sourceUrl: 'https://claude.ai/settings/usage', message: 'Connect Claude Code to receive quota updates during normal use.' },
   codex: { name: 'Codex', mode: 'automatic', sourceUrl: 'https://chatgpt.com/codex/settings/usage', message: 'Connect your installed Codex account for automatic quota updates.' },
-  cursor: { name: 'Cursor', mode: 'experimental', sourceUrl: 'https://cursor.com/dashboard?tab=usage', message: 'Connect a private browser session to read Cursor usage.' },
+  cursor: { name: 'Cursor', mode: 'experimental', sourceUrl: 'https://cursor.com/dashboard?tab=usage', message: 'Pair the Cursor browser extension in Connection Details. Sign in only in your normal browser.' },
 } as const;
 export function initialState(): StoredState {
   return { version:1, settings:{...defaultSettings}, actions:[], providers:providerIds.map(id => ({
