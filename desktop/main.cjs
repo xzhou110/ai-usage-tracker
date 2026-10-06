@@ -77,7 +77,6 @@ async function start() {
   const controls = createWindowControls(window, screen, state => {
     if (!window.webContents.isDestroyed()) window.webContents.send('tracker:window-state', state);
   });
-  ipcMain.handle('tracker:minimize', event => { trusted(event); controls.minimize(); });
   ipcMain.handle('tracker:window-state', event => { trusted(event); return controls.state(); });
   ipcMain.handle('tracker:auto-hide', (event, value) => { trusted(event); return controls.setAutoHide(value); });
   ipcMain.handle('tracker:interaction-hold', (event, value) => { trusted(event); controls.setInteractionHold(value); });

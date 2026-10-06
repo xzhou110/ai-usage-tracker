@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Activity, ArrowUpRight, Minus, Moon, PanelRight, Pencil, RefreshCw, Sun, X } from 'lucide-react';
+import { Activity, ArrowUpRight, Moon, PanelRight, Pencil, RefreshCw, Sun, X } from 'lucide-react';
 import type { DashboardSnapshot, Membership, ProviderId, ProviderState } from '../shared/schema';
 import { MembershipSchema } from '../shared/schema';
 import { Badge, ProviderMark, connectionCopy } from './components';
@@ -10,7 +10,7 @@ import './sidebar.css';
 type WindowState = { autoHide: boolean; hidden: boolean };
 declare global {
   interface Window {
-    trackerDesktop?: { minimize(): Promise<void>; openDashboard(): Promise<void>; getWindowState?(): Promise<WindowState>; setAutoHide?(value: boolean): Promise<WindowState>; setInteractionHold?(value: boolean): Promise<void>; onWindowState?(callback: (state: WindowState) => void): () => void };
+    trackerDesktop?: { openDashboard(): Promise<void>; getWindowState?(): Promise<WindowState>; setAutoHide?(value: boolean): Promise<WindowState>; setInteractionHold?(value: boolean): Promise<void>; onWindowState?(callback: (state: WindowState) => void): () => void };
   }
 }
 export function subscriptionPrice(membership: Membership): string {
@@ -101,7 +101,6 @@ export function SidebarView({ snapshot, now, theme, toggleTheme, busy, refresh, 
     <header className="usage-sidebar-header"><div><Activity size={21} /><h1>AI Usage Tracker</h1></div><span>By XuSeak · Private on This PC</span></header>
     <div className="usage-sidebar-toolbar"><button className="button secondary" onClick={toggleTheme}>{theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}{theme === 'light' ? 'Dark' : 'Light'}</button>
       <button className="button secondary window-toggle" disabled={!desktop || windowBusy || !windowState} title={desktop ? 'Hide at the Upper-Right Corner' : 'Available in the Windows App'} aria-pressed={windowState?.autoHide ?? false} onClick={() => desktop && void native(async () => setWindowState(await desktop.setAutoHide!(!windowState?.autoHide)))}><PanelRight size={14} />Auto-Hide<span>{desktop ? windowState ? windowState.autoHide ? 'On' : 'Off' : '…' : 'Off'}</span></button>
-      {desktop && <button className="button icon-button" aria-label="Minimize Sidebar" title="Minimize to Taskbar" onClick={() => void native(() => desktop.minimize())}><Minus size={18} /></button>}
       {!desktop && <span className="small-label">Sidebar Preview</span>}
     </div>
     {desktop && !currentHost && <p className="sidebar-provider-warning" role="status">Window controls were updated. Close this Windows window and reopen AI Usage Tracker to activate them.</p>}

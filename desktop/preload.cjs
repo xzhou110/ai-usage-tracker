@@ -1,6 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('trackerDesktop', Object.freeze({
-  minimize: () => ipcRenderer.invoke('tracker:minimize'),
   getWindowState: () => ipcRenderer.invoke('tracker:window-state'),
   setAutoHide: value => ipcRenderer.invoke('tracker:auto-hide', value),
   setInteractionHold: value => ipcRenderer.invoke('tracker:interaction-hold', value),

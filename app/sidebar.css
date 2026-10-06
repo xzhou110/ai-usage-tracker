@@ -8,7 +8,6 @@
 .window-toggle > span { font-weight: 700; }
 .sidebar-preview-note { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
 .usage-sidebar-toolbar .button { font-size: 11px; padding: 7px 9px; min-height: 31px; }
-.usage-sidebar-toolbar .icon-button { margin-left: auto; }
 .sidebar-accounts { display: grid; gap: 12px; }
 .sidebar-account { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
 .sidebar-account > header { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 8px 11px 6px; }

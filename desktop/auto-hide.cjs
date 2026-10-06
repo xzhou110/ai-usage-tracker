@@ -23,6 +23,10 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
   const wasAlwaysOnTop = window.isAlwaysOnTop();
   const state = () => ({ autoHide, hidden });
   const publish = () => { if (!window.isDestroyed()) changed(state()); };
+  function uncover() {
+    window.setOpacity(1);
+    window.setIgnoreMouseEvents(false);
+  }
   function area() {
     return (screen.getAllDisplays().find(display => display.id === displayId) ?? screen.getDisplayMatching(normalBounds)).workArea;
   }
@@ -36,17 +40,18 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
     try { window.setBounds(next); } finally { adjusting = false; }
   }
   function reveal(focus = false) {
-    if (!autoHide || window.isDestroyed() || (window.isMinimized() && !hidden)) return;
+    if (!autoHide || window.isDestroyed() || window.isMinimized()) return;
     hidden = false; hoverSince = null; outsideSince = null;
     graceUntil = clock.now() + HIDE_DELAY;
     window.setAlwaysOnTop(true, 'floating');
     // Hover reveals without stealing keyboard focus from the user's other app.
     if (focus) window.show(); else window.showInactive();
     align();
+    uncover();
     window.moveTop(); publish();
   }
   function tick() {
-    if (!autoHide || window.isDestroyed() || (window.isMinimized() && !hidden) || window.isFullScreen()) return;
+    if (!autoHide || window.isDestroyed() || window.isMinimized() || window.isFullScreen()) return;
     const now = clock.now();
     const point = screen.getCursorScreenPoint();
     if (hidden) {
@@ -62,14 +67,23 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
     if (now - outsideSince >= HIDE_DELAY) {
       hidden = true; hoverSince = null; outsideSince = null;
       normalBounds = window.getBounds();
-      // Minimize preserves the Windows taskbar recovery path; hide removes it.
-      window.minimize(); publish();
+      // Stay at the corner with a taskbar entry, without Windows' minimize animation.
+      // Release both pointer and keyboard input while the window is invisible.
+      window.setIgnoreMouseEvents(true);
+      window.setOpacity(0);
+      window.blur();
+      publish();
     }
   }
   function shown() {
     if (!autoHide || window.isMinimized()) return;
     hidden = false; outsideSince = null; hoverSince = null; graceUntil = clock.now() + HIDE_DELAY;
-    align(); window.setAlwaysOnTop(true, 'floating'); publish();
+    align(); window.setAlwaysOnTop(true, 'floating'); uncover(); publish();
+  }
+  function minimized() {
+    // The native title-bar minimize remains an explicit user action.
+    hidden = false; hoverSince = null; outsideSince = null;
+    uncover(); publish();
   }
   function moved() {
     if (adjusting || !autoHide || window.isMinimized()) return;
@@ -83,7 +97,7 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
     displayId = display.id;
     align();
   }
-  const listeners = { moved, resized: align, restore: shown, show: shown, 'leave-full-screen': shown };
+  const listeners = { moved, resized: align, restore: shown, show: shown, focus: shown, minimize: minimized, 'leave-full-screen': shown };
   for (const [event, listener] of Object.entries(listeners)) window.on(event, listener);
   const displayEvents = ['display-added', 'display-removed', 'display-metrics-changed'];
   for (const event of displayEvents) screen.on(event, displayChanged);
@@ -93,10 +107,6 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
   });
   return {
     state,
-    minimize() {
-      hidden = false; hoverSince = null; outsideSince = null;
-      window.minimize(); publish();
-    },
     setInteractionHold(value) {
       if (typeof value !== 'boolean') throw new Error('Invalid state.');
       hold = value; outsideSince = null;
@@ -118,6 +128,7 @@ function createWindowControls(window, screen, changed = () => {}, clock = { now:
       } else {
         hidden = false; hoverSince = null; outsideSince = null;
         window.setAlwaysOnTop(wasAlwaysOnTop, 'floating');
+        uncover();
         window.show();
       }
       publish(); return state();

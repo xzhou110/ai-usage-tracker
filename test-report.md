@@ -1,5 +1,9 @@
 # AI Usage Tracker Validation
 
+## Instant Corner Hiding Follow-Up
+
+Eight focused desktop tests passed with TypeScript and the production build. Window doubles verify unchanged corner bounds, retained native visibility without minimization, zero opacity and pointer pass-through while hidden, released keyboard focus, corner reveal, taskbar focus recovery, editing hold, native minimize/restore, disable, display recovery, and cleanup. Removed the duplicate toolbar button and its unused IPC method; reviewed the source diff. Actual Windows visuals and taskbar activation remain unverified because native UI tools are unavailable. This replaces the automatic-minimization approach below, which produced an unwanted Windows animation reported by the owner.
+
 ## Taskbar Recovery and Price Input Follow-Up
 
 Seven focused desktop tests across two files passed, along with TypeScript and the production build. Regression coverage checks automatic minimization instead of full hiding, corner reveal through inactive show, explicit-minimize suppression, taskbar restore, display removal with minimized-window coordinates, disabling Auto-Hide, and cleanup. These use native-window doubles, not actual Windows interaction.
