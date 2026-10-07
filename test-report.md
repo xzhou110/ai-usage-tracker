@@ -1,5 +1,8 @@
 # AI Usage Tracker Validation
 
+## Command Center Local-App Status
+
+October 6: The initial local requests were refused because the tracker was stopped. Launched through the verified installed Start shortcut; GET and HEAD on the page returned 200, and /api/health identified ai-usage-tracker with membership API version 1. Command Center's actual probeApp reported configured, occupied, and ready. Corrected project metadata (live: none, phase: polishing), preserved shared launch configuration and shortcuts, updated the workspace index, and regenerated Command Center through its collector. The resulting tracker record has no live-site URL, retains its local app mapping, reports running, and has zero tracker-specific source/vocabulary warnings. This checks server/monitoring health, not live provider quota accuracy. No app code changed or application test suite rerun.
 ## Windows Launch Discoverability
 
 Installed Start and Desktop shortcuts using the existing Windows Script Host. Verified saved targets, quoted entry-point arguments, and working directories. Re-ran the installer successfully, then confirmed one tracker main process after launching through the installed Start entry. Reviewed the installer and docs diff; no application code changed, so no app suite/build rerun was needed. Native visual launch and Start search indexing remain outside the available browser-only tools. PowerShell execution policy was left unchanged.

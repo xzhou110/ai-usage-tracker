@@ -4,6 +4,8 @@ A private Windows dashboard for Claude, Codex, and Cursor quota usage and reset 
 
 ## Open the App
 
+In X Command Center, this is an on-demand **local app**, not a continuously hosted website. Use its **Start App** action or the Windows shortcut when it is stopped. Closing the sidebar also stops a server it started; an unreachable local address then means it is not running, not that the public GitHub source is down.
+
 On this PC, press the **Windows key**, type **AI Usage Tracker**, and open it. The Start shortcut launches the sidebar and starts its local server when needed. You can also double-click **AI Usage Tracker** on your desktop. Neither route needs Codex or a terminal. Opening it again brings the existing app forward.
 
 The app stays in `D:/Meaningful/AI/ai-usage-tracker`; these shortcuts point there. If Start search has not indexed it yet, use the desktop shortcut or double-click **Start-AI-Usage-Sidebar.vbs** in the project folder. To keep a launcher on your taskbar after closing the app, right-click the Start result and choose **Pin to Taskbar** (Windows may put this under **More**). Pinning is an optional personal Windows action; no automatic startup or pinning is configured.

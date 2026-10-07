@@ -2,11 +2,11 @@
 name: ai-usage-tracker
 summary: Private dashboard for Claude, Codex, and Cursor quota usage and reset times
 status: active
-live: http://127.0.0.1:8175
+live: none
 repo: https://github.com/xzhou110/ai-usage-tracker
-updated: 2026-10-05
+updated: 2026-10-06
 category: ai-tooling
-phase: usable-local-release
+phase: polishing
 next: Receive Claude quota and install/reconcile the Cursor browser extension
 visibility: private
 repo_visibility: public
@@ -31,6 +31,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Started | 2026-10-05 |
 
 ## 3. Key Things to Know
+- Command Center treats this as an on-demand local app, not a public live site: live: none prevents expected shutdowns from raising website-outage warnings. Its Start App mapping remains in the workspace .claude/launch.json at port 8175. Closing a sidebar-owned server stops the local address; launch again to restore it. The public GitHub repository hosts source only.
 - Automatic source backup is authorized: after each completed, proportionately validated change, commit and push to the public GitHub repository without another confirmation. Privacy/secret hooks remain mandatory; credentials and runtime account data stay local. The visibility: private metadata still describes runtime-data handling, not repository visibility. See AGENTS.md.
 - Everyday launch: use AI Usage Tracker in Windows Start or on the Desktop. Shortcuts target this project; scripts/install-windows-shortcuts.vbs recreates them after setup. The VBS launcher remains a folder-based fallback. Launching again reveals the existing instance; no automatic startup is enabled.
 - Windows sidebar: Start-AI-Usage-Sidebar.vbs opens a native window with one Auto-Hide toggle. It hides after the pointer leaves, reveals on upper-right corner hover without taking focus, and stays visible for editing/dialogs. This replaces the earlier two pin/edge controls. Membership name, price, currency, and period are user-entered local metadata, never inferred from quota.
