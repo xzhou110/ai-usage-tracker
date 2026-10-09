@@ -216,6 +216,13 @@ export async function startServer(options: ServerOptions) {
         json(response, 200, await options.connectors.cursor.browser.issuePairing());
         return;
       }
+      // Native mod requests use the ordinary localhost mutation guard above.
+      // No extension CORS exception, authentication cookies, or raw session data.
+      if (method === 'POST' && pathname === '/api/claude-desktop/reading') {
+        await providers.receiveClaudeDesktop(await body(request, 8192));
+        json(response, 200, { ok: true });
+        return;
+      }
       if (get && pathname === '/api/settings') {
         const snapshot = await store.snapshot();
         response.setHeader('ETag', `"${snapshot.revision}"`);

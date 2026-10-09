@@ -1,0 +1,5 @@
+{
+  "name": "ai-usage-tracker-local",
+  "owner": { "name": "XuSeak" },
+  "plugins": [{ "name": "ai-usage-tracker-bridge", "source": "./quota-bridge", "description": "Send Claude Code quota to AI Usage Tracker on this PC." }]
+}

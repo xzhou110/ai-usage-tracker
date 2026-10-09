@@ -4,6 +4,8 @@ import { AppError } from './errors.ts';
 import { StateStore, sameQuota, validateObservation } from './store.ts';
 import { ConnectorError } from './connectors/errors.ts';
 import { CURSOR_BROWSER_GUIDANCE } from './connectors/cursor.ts';
+import { ClaudeConnector } from './connectors/claude.ts';
+import { CLAUDE_DESKTOP_GUIDANCE } from './connectors/claude-desktop.ts';
 
 type Operation = 'connect' | 'refresh';
 
@@ -170,6 +172,24 @@ export class ProviderService {
         provider.errorCode = null; provider.lastAttemptAt = observation.receivedAt; provider.lastSuccessAt = observation.observedAt; provider.nextRefreshAt = null;
       });
     } finally { this.reserved.delete('cursor'); }
+  }
+
+  async receiveClaudeDesktop(input: unknown): Promise<void> {
+    if (this.stopped) throw new AppError(503, 'UNAVAILABLE', 'The tracker is shutting down.');
+    if (this.reserved.has('claude')) throw new AppError(409, 'CONFLICT', 'A Claude update is in progress.');
+    const connector = this.connectors.claude;
+    if (!(connector instanceof ClaudeConnector)) throw new AppError(503, 'UNAVAILABLE', 'Claude Desktop bridge is unavailable.');
+    this.reserved.add('claude');
+    try {
+      await this.store.transaction(async state => {
+        const provider = state.providers.find(item => item.id === 'claude')!;
+        if (!provider.enabled) throw new AppError(409, 'CONFLICT', 'Claude is disconnected. Connect it in the tracker first.');
+        const observation = await connector.acceptDesktop(input);
+        if (!sameQuota(provider.observation, observation)) provider.observation = await this.store.saveObservation(state, observation);
+        provider.status = 'connected'; provider.message = CLAUDE_DESKTOP_GUIDANCE;
+        provider.lastSuccessAt = observation.observedAt; provider.errorCode = null;
+      });
+    } finally { this.reserved.delete('claude'); }
   }
 
   async disconnect(providerId: ProviderId) {

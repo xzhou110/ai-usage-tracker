@@ -16,7 +16,7 @@ export type QuotaWindow = z.infer<typeof QuotaWindowSchema>;
 export const ObservationSchema = z.object({
   id: z.string().regex(/^[a-zA-Z0-9_-]+$/), provider: ProviderIdSchema,
   observedAt: IsoTimeSchema, receivedAt: IsoTimeSchema,
-  source: z.enum(['codex-app-server', 'claude-statusline', 'cursor-browser']),
+  source: z.enum(['codex-app-server', 'claude-statusline', 'claude-desktop-mod', 'cursor-browser']),
   windows: z.array(QuotaWindowSchema),
 }).strict();
 export type Observation = z.infer<typeof ObservationSchema>;
@@ -66,7 +66,7 @@ export interface ProviderOperation { provider: ProviderId; accepted: boolean; me
 export interface ApiError { error: { code: string; message: string } }
 
 export const providerDefinitions = {
-  claude: { name: 'Claude', mode: 'passive', sourceUrl: 'https://claude.ai/settings/usage', message: 'Connect Claude Code to receive quota updates during normal use.' },
+  claude: { name: 'Claude', mode: 'passive', sourceUrl: 'https://claude.ai/settings/usage', message: 'Connect the Claude Code bridge to receive quota during normal use. Desktop Code requires the local mod.' },
   codex: { name: 'Codex', mode: 'automatic', sourceUrl: 'https://chatgpt.com/codex/settings/usage', message: 'Connect your installed Codex account for automatic quota updates.' },
   cursor: { name: 'Cursor', mode: 'experimental', sourceUrl: 'https://cursor.com/dashboard?tab=usage', message: 'Pair the Cursor browser extension in Connection Details. Sign in only in your normal browser.' },
 } as const;

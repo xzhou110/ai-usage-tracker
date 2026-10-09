@@ -6,11 +6,11 @@ import { request, errorMessage } from './api';
 
 export const connectionCopy: Record<ProviderId, { summary: string; limitation: string; what: string; why: string; user: string; action: string }> = {
   claude: {
-    summary: 'Reads Claude Code terminal quota; Refresh checks saved readings.',
-    limitation: 'Terminal status-line integration only. Desktop or website activity alone does not establish a connection. Current Claude limits are available on its Usage page.',
-    what: 'Install a quota-only status-line bridge for Claude Code in a terminal. Your existing status-line command is preserved. Only allowance and reset fields are saved here.',
-    why: 'Claude Code supplies subscription usage windows to terminal status-line scripts after a normal model response. Checking a saved reading does not request fresh quota from Claude.',
-    user: 'Use Claude Code in a terminal signed in to your subscription during your normal work. You must choose and authenticate that account yourself. Do not send a paid message just to populate the tracker. If you use Desktop or the website, check Claude Usage while that integration is unavailable.',
+    summary: 'Claude Desktop Code sends quota through the local bridge.',
+    limitation: 'Requires the local Claude Code bridge and an open local Code session. Refresh checks saved readings; it cannot query a closed Claude session.',
+    what: 'The AI Usage Tracker bridge is a local Claude Code mod. It receives only reported allowance percentages and reset times, and sends them to this PC. It also works in terminal Code sessions; Desktop chat and cloud Code sessions are not verified.',
+    why: 'Desktop Code does not run the terminal status line. Its supported mods API exposes the same quota counters without reading credentials, conversations, or generating a model request.',
+    user: 'After bridge installation, open a new local Code session in Claude Desktop to load it, then continue normal work. Existing sessions may need to be reopened. Keep AI Usage Tracker running to receive updates. You control when to reopen Claude so active work is not interrupted. No paid test message is needed. For setup or repair, see claude-plugin/README.md in the project.',
     action: 'Connect Claude',
   },
   codex: {

@@ -1,0 +1,6 @@
+{
+  "name": "ai-usage-tracker-bridge",
+  "version": "0.1.1",
+  "author": { "name": "XuSeak" },
+  "description": "Read Claude Code Desktop quota through the mods API and send only allowance fields to the local AI Usage Tracker. No model calls or credentials."
+}

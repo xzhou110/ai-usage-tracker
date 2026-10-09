@@ -26,7 +26,8 @@ export function validateState(value: unknown): StoredState {
 export function validateObservation(value: unknown, provider: ProviderId): Observation {
   const observation = ObservationSchema.parse(value);
   const sources = { claude: 'claude-statusline', codex: 'codex-app-server', cursor: 'cursor-browser' };
-  if (observation.provider !== provider || observation.source !== sources[provider] || new Set(observation.windows.map(window => window.key)).size !== observation.windows.length) throw storageError();
+  const correctSource = observation.source === sources[provider] || provider === 'claude' && observation.source === 'claude-desktop-mod';
+  if (observation.provider !== provider || !correctSource || new Set(observation.windows.map(window => window.key)).size !== observation.windows.length) throw storageError();
   return observation;
 }
 

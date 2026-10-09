@@ -33,7 +33,7 @@ interface Observation {
   provider: ProviderId;
   observedAt: IsoTime;         // Poll completion or changed Claude projection time.
   receivedAt: IsoTime;
-  source: 'codex-app-server' | 'claude-statusline' | 'cursor-browser';
+  source: 'codex-app-server' | 'claude-statusline' | 'claude-desktop-mod' | 'cursor-browser';
   windows: QuotaWindow[];
 }
 

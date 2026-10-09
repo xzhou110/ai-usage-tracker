@@ -3,6 +3,7 @@ import type { Observation, ProviderState, QuotaWindow } from '../shared/schema';
 export const sourceNames: Record<Observation['source'], string> = {
   'codex-app-server': 'Installed Codex Account',
   'claude-statusline': 'Claude Code Status Line',
+  'claude-desktop-mod': 'Claude Desktop Code Bridge',
   'cursor-browser': 'Cursor Usage Page',
 };
 

@@ -7,7 +7,7 @@ repo: https://github.com/xzhou110/ai-usage-tracker
 updated: 2026-10-08
 category: ai-tooling
 phase: polishing
-next: Receive Claude quota and install/reconcile the Cursor browser extension
+next: Reconcile the first Claude Desktop Code reading and the Cursor browser extension
 visibility: private
 repo_visibility: public
 ---
@@ -15,7 +15,7 @@ repo_visibility: public
 # AI Usage Tracker
 
 ## 1. Summary
-XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one private Windows dashboard, preserving each provider's quota windows, units, and reset times. The production app includes usage history, reset countdowns, connection notices, and settings. Codex is live and reconciled; Claude awaits a native quota event; the replacement Cursor browser extension awaits user installation and live reconciliation.
+XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one private Windows dashboard, preserving each provider's quota windows, units, and reset times. The production app includes usage history, reset countdowns, connection notices, and settings. Codex is live and reconciled; the Claude Desktop Code mod is installed and awaits a real quota event; the replacement Cursor browser extension awaits live reconciliation.
 
 ## 2. Key Facts
 | Item | Value |
@@ -39,19 +39,20 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 - The Auto-Hide button stays in its original toolbar position; no duplicate toolbar Minimize button. On pointer exit, the window becomes transparent in place and passes clicks through, releasing keyboard focus without minimizing or animating. It reveals from the upper-right corner's right-edge hotspot (3 by 48 DIP) or taskbar activation. Its usage-bars taskbar icon remains available. Native title-bar Minimize suspends hover reveal. The browser preview shows Auto-Hide disabled.
 - The desktop host uses Electron with a sandboxed renderer and restricted IPC. Browser-only usage remains supported. Closing the sidebar stops only a server it started; minimizing keeps collection running.
 - A chat tool reading usage is not proof of a standalone app integration.
+- Claude Desktop Code uses the native mod in claude-plugin/, not the terminal status line. Setup: scripts/install-claude-desktop-bridge.ps1; new local Code sessions load it. It projects only allowance fields to the ordinary guarded localhost receiver. See claude-plugin/README.md for installation, runtime conditions, tests, and remaining live validation.
 - Unknown or expired observations must never appear as zero usage or confirmed resets.
 - Do not read conversations, prompts, employer repositories, or unrelated account data.
 - No account identifiers, credentials, or real usage observations belong in tracked files.
 
 ## 4. Details
 ### How It Works
-Provider adapters normalize quota observations into separate windows. A local server stores observations; the dashboard displays current usage, reset countdowns, freshness, history, and connection actions. Codex uses its installed app-server, Claude uses a passive status-line bridge, and Cursor uses a paired extension in the user's normal browser. Only quota projections cross the browser boundary; the tracker stores a hash of the extension token, never browser credentials. Pair/reading routes alone accept a bound extension Origin; other routes keep their same-origin guards.
+Provider adapters normalize quota observations into separate windows. A local server stores observations; the dashboard displays current usage, reset countdowns, freshness, history, and connection actions. Codex uses its installed app-server, Claude Desktop Code uses a passive native mod (with the older terminal bridge retained), and Cursor uses a paired extension in the user's normal browser. Only quota projections cross boundaries. Cursor pair/reading routes alone accept a bound extension Origin; the Claude mod uses the existing localhost mutation guard without a new CORS exception.
 
 ### How to Work on It
 Read PRD.md and STATE.md first. Prove data access before promising automatic collection. Follow the proportional verification tiers in AGENTS.md: focused checks for small asks, full production QA for major updates and app completion/release milestones, and deeper targeted review for high-risk changes. Live reconciliation is required before claiming a connector is verified; unrelated edits do not require repeating it.
 
 ### Current State and Open Items
-Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude's terminal status-line bridge is installed, but a real quota event remains unverified; ordinary Desktop or website activity does not prove this integration. Background polls no longer extend the manual refresh cooldown, and waiting reasons appear in the sidebar. Cursor's automated sign-in failed and was replaced; extension installation and real quota reconciliation remain pending. See test-report.md and STATE.md for precise coverage.
+Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude Desktop Code was confirmed as the intended surface; a local mod is installed and the ineffective terminal wrapper restored. Native mod tests, local receiver tests, and independent privacy review passed; an actual Desktop reading and reconciliation remain pending. Background polls no longer extend the manual refresh cooldown. Cursor's automated sign-in failed and was replaced; real extension reconciliation remains pending. See test-report.md and STATE.md for precise coverage.
 
 ### Change Highlights
 - 2026-10-05 — Created project home and initial PRD before application code.

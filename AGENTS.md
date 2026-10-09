@@ -16,7 +16,7 @@ Read PROJECT.md and PRD.md first. This project lives directly under D:/Meaningfu
 
 ## Implementation
 - Codex: installed app-server account/rateLimits/read, only initialization + quota methods; discard unrelated fields.
-- Claude: supported rate_limits status-line input; capture only quota fields; preserve existing status line.
+- Claude: prefer the local Desktop Code mod (`claude-plugin/`) for Desktop Code. Project only native session.measure rateLimits fields before sending to the guarded local receiver. Do not timestamp cached startup snapshots as fresh. The legacy terminal status-line bridge remains supported; preserve/restore existing status-line settings during migration. Do not read credentials or session transcripts. Native mod tests run with Claude's `plugin test`, separately from Vitest.
 - Cursor: use only the paired extension in the owner's normal browser. Automated sign-in was rejected by Google and Cloudflare; never retry that path, copy cookies, or bypass challenges. The extension must project quota fields before crossing the browser boundary. Installation and live reconciliation are required before claiming support; opening the official dashboard alone is not a connection.
 - Never infer zero usage or refreshed allowance from missing data or an expired timestamp.
 - Bind to 127.0.0.1; verify Host, Origin, and mutation header; JSON writes atomic with ETag concurrency protection.

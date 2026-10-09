@@ -5,6 +5,8 @@ import { ObservationSchema, type ConnectorResult, type ProviderConnector } from 
 import { atomicJson, quoteNativeArgument, readSmallJson, resolveNativeShell } from '../../tools/claude-statusline-bridge.mjs';
 import { object } from './normalize.ts';
 import { ConnectorError } from './errors.ts';
+import { CLAUDE_DESKTOP_GUIDANCE, parseClaudeDesktop } from './claude-desktop.ts';
+import { sameQuota } from '../store.ts';
 
 interface Backup { version: 1; active: boolean; statusLinePresent: boolean; statusLine: unknown; installedCommand: string; installedStatusLine: Record<string, unknown> }
 const generic = () => new ConnectorError('CLAUDE_SETTINGS_UNAVAILABLE', 'Claude settings could not be updated safely. Check native settings and retry; existing settings were preserved.');
@@ -37,7 +39,33 @@ export class ClaudeConnector implements ProviderConnector {
   private settingsPath: string;
   constructor(root: string, settingsPath = join(homedir(), '.claude', 'settings.json')) { this.root = root; this.settingsPath = settingsPath; }
   private get backupPath() { return join(this.root, 'local', 'claude-statusline-backup.json'); }
+  async desktopInstalled(): Promise<boolean> {
+    try {
+      const marker = object(await readSmallJson(join(this.root, 'local', 'claude-desktop-installed.json')));
+      return marker.version === 1;
+    } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false; throw generic(); }
+  }
+  private async desktopObservation() {
+    try {
+      const reading = ObservationSchema.parse(await readSmallJson(join(this.root, 'local', 'claude-desktop-inbox.json')));
+      if (reading.provider !== 'claude' || reading.source !== 'claude-desktop-mod') throw generic();
+      return reading;
+    } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null; throw generic(); }
+  }
+  // Called only inside ProviderService's reservation and enabled-state transaction.
+  async acceptDesktop(input: unknown) {
+    if (!await this.desktopInstalled()) throw new ConnectorError('CLAUDE_DESKTOP_NOT_INSTALLED', 'Install the Claude Desktop bridge before sending quota.');
+    const incoming = parseClaudeDesktop(input);
+    const previous = await this.desktopObservation();
+    // An older session's cached delivery cannot roll a newer observation back.
+    if (previous && Date.parse(incoming.observedAt) < Date.parse(previous.observedAt)) return previous;
+    const saved = previous && sameQuota(previous, incoming)
+      ? { ...incoming, id: previous.id, observedAt: previous.observedAt } : incoming;
+    await atomicJson(join(this.root, 'local', 'claude-desktop-inbox.json'), saved);
+    return saved;
+  }
   async connect(): Promise<ConnectorResult> {
+    if (await this.desktopInstalled()) return this.refresh();
     const settings = await readSettings(this.settingsPath);
     const previous = await readBackup(this.backupPath);
     const shell = await resolveNativeShell();
@@ -67,6 +95,10 @@ export class ClaudeConnector implements ProviderConnector {
     return this.refresh();
   }
   async refresh(): Promise<ConnectorResult> {
+    if (await this.desktopInstalled()) {
+      const observation = await this.desktopObservation();
+      return { observation, waiting: !observation, message: CLAUDE_DESKTOP_GUIDANCE };
+    }
     const backup = await readBackup(this.backupPath);
     if (!backup?.active) throw new ConnectorError('CLAUDE_BRIDGE_NOT_CONNECTED', 'The Claude bridge is not connected. Select Connect to install the native status-line integration.');
     const settings = await readSettings(this.settingsPath);

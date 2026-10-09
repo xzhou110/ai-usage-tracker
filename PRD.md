@@ -37,6 +37,8 @@ Cursor replacement: Owner confirmed sign-in works in a normal browser. Build a l
 
 ## Provider Semantics and Evidence
 ### Claude
+October 8: The intended runtime is Claude Desktop's local Code tab. Use a native Claude Code mod to receive quota measurement events; do not rely on the terminal status-line bridge in Desktop. Project allowance fields before local transmission, keep retries out of the session-event chain, reject uploads after disconnect, and preserve cached observation timestamps. A new local Code session loads the installed mod. Native validation and fixture tests do not establish a live account reading; reconcile the first actual event separately. Do not start a paid model turn solely for testing.
+
 Claude's official documentation says usage limits are shared across its product surfaces and depend on plan and workload. The collector must use reported windows rather than estimating quota from local token counts. A supported standalone personal-account usage endpoint has not yet been established.
 Source: https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work
 
