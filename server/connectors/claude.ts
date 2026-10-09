@@ -79,7 +79,7 @@ export class ClaudeConnector implements ProviderConnector {
       return { observation: incoming, message: 'Claude Code sends quota during normal use. Refresh imports its latest stored reading; repeated data does not advance freshness.' };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') return { observation: null, waiting: true,
-        message: 'Bridge connected. Continue your normal Claude Code session to receive quota. The tracker will not create a paid model turn.' };
+        message: 'No quota has reached the terminal status-line bridge. Use Claude Code in a terminal signed in to your subscription during your normal work. Desktop or website activity alone does not establish this connection. Refresh only checks saved readings; view Claude Usage for current limits.' };
       throw new ConnectorError('CLAUDE_INBOX_UNAVAILABLE', 'The Claude quota inbox could not be read safely. Your previous observation is preserved.');
     }
   }

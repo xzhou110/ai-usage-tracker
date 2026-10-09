@@ -4,7 +4,7 @@ summary: Private dashboard for Claude, Codex, and Cursor quota usage and reset t
 status: active
 live: none
 repo: https://github.com/xzhou110/ai-usage-tracker
-updated: 2026-10-06
+updated: 2026-10-08
 category: ai-tooling
 phase: polishing
 next: Receive Claude quota and install/reconcile the Cursor browser extension
@@ -51,7 +51,7 @@ Provider adapters normalize quota observations into separate windows. A local se
 Read PRD.md and STATE.md first. Prove data access before promising automatic collection. Follow the proportional verification tiers in AGENTS.md: focused checks for small asks, full production QA for major updates and app completion/release milestones, and deeper targeted review for high-risk changes. Live reconciliation is required before claiming a connector is verified; unrelated edits do not require repeating it.
 
 ### Current State and Open Items
-Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude's bridge is installed. Cursor's automated sign-in failed and was replaced; extension installation and real quota reconciliation remain pending. Neither Claude nor Cursor has a live quota reading yet. See test-report.md and STATE.md for precise coverage.
+Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude's terminal status-line bridge is installed, but a real quota event remains unverified; ordinary Desktop or website activity does not prove this integration. Background polls no longer extend the manual refresh cooldown, and waiting reasons appear in the sidebar. Cursor's automated sign-in failed and was replaced; extension installation and real quota reconciliation remain pending. See test-report.md and STATE.md for precise coverage.
 
 ### Change Highlights
 - 2026-10-05 — Created project home and initial PRD before application code.

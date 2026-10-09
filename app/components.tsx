@@ -6,11 +6,11 @@ import { request, errorMessage } from './api';
 
 export const connectionCopy: Record<ProviderId, { summary: string; limitation: string; what: string; why: string; user: string; action: string }> = {
   claude: {
-    summary: 'Quota updates while you use Claude Code.',
-    limitation: 'Updates during Claude Code use; an idle account cannot be refreshed independently.',
-    what: 'Install a quota-only status-line bridge for Claude Code. Your existing status-line command is preserved. Only allowance and reset fields are saved here.',
-    why: 'Claude Code supplies usage windows through its status line. The bridge lets this dashboard receive those readings during normal use.',
-    user: 'After connecting, start or continue a normal Claude Code session. Claude must send a quota event; the tracker cannot generate one on your behalf.',
+    summary: 'Reads Claude Code terminal quota; Refresh checks saved readings.',
+    limitation: 'Terminal status-line integration only. Desktop or website activity alone does not establish a connection. Current Claude limits are available on its Usage page.',
+    what: 'Install a quota-only status-line bridge for Claude Code in a terminal. Your existing status-line command is preserved. Only allowance and reset fields are saved here.',
+    why: 'Claude Code supplies subscription usage windows to terminal status-line scripts after a normal model response. Checking a saved reading does not request fresh quota from Claude.',
+    user: 'Use Claude Code in a terminal signed in to your subscription during your normal work. You must choose and authenticate that account yourself. Do not send a paid message just to populate the tracker. If you use Desktop or the website, check Claude Usage while that integration is unavailable.',
     action: 'Connect Claude',
   },
   codex: {

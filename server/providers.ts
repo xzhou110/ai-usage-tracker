@@ -97,7 +97,8 @@ export class ProviderService {
       this.reserved.delete(providerId);
       throw error;
     }
-    this.lastRequested.set(providerId, Date.now());
+    // Background polling must not keep extending the manual-refresh cooldown.
+    if (!automatic) this.lastRequested.set(providerId, Date.now());
     const promise = this.perform(providerId, operation, automatic).catch(error => {
       // A failed persistence operation is visible through health/status, never silently swallowed.
       this.fault = error instanceof AppError ? error : new AppError(500, 'STORAGE_ERROR', 'A provider update could not be saved.');

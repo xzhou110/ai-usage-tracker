@@ -13,6 +13,7 @@ import { StateStore } from './store.ts';
 import { ConnectorError } from './connectors/errors.ts';
 import { CursorConnector } from './connectors/cursor.ts';
 import { acquireLock } from './lock.ts';
+import { ProviderService } from './providers.ts';
 
 const cleanup: (() => Promise<unknown>)[] = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
@@ -51,6 +52,28 @@ async function fixture() {
   cleanup.push(() => app.close());
   return { root, distDir, app, ...fake };
 }
+
+describe('Manual Refresh Cooldown', () => {
+  it('allows a manual Claude refresh after passive polling but still throttles repeated clicks', async () => {
+    const root = await temporary();
+    const store = new StateStore(root);
+    await store.initialize(false);
+    cleanup.push(() => store.close());
+    const fake = fakeConnectors();
+    const service = new ProviderService(store, fake.connectors);
+    cleanup.push(() => service.close());
+    await store.transaction(state => { state.providers.find(item => item.id === 'claude')!.enabled = true; });
+    expect((await service.request('claude', 'refresh', true)).accepted).toBe(true);
+    // Polling has settled once its observation is persisted and reservation released.
+    for (let attempt = 0; attempt < 100 && !(await store.snapshot()).providers.find(item => item.id === 'claude')!.observation; attempt++) await delay(10);
+    await delay(10);
+    const manual = await service.request('claude', 'refresh');
+    expect(manual.accepted).toBe(true);
+    await delay(30);
+    expect(await service.request('claude', 'refresh')).toMatchObject({ accepted: false });
+    expect(fake.calls.claude.refresh).toBe(2);
+  });
+});
 
 async function getStatus(app: Awaited<ReturnType<typeof startServer>>): Promise<DashboardSnapshot> {
   const response = await fetch(`${app.url}/api/status`);

@@ -50,7 +50,7 @@ Connect installs a reversible native status-line bridge only after the user clic
 
 The bridge parses stdin in memory and writes only `rate_limits.five_hour` and `rate_limits.seven_day` numbers/reset timestamps. Record `receivedAt` on delivery but advance `observedAt` only when the normalized quota payload changes. Repeated cached status-line input must not look like a fresh provider observation. A missing rate_limits block is no new quota evidence; it cannot overwrite a last good snapshot with zero or erase it. Changed valid payloads may omit an expired window; the new observation then omits that window honestly.
 
-Claude is a passive integration: normal Claude Code activity provides observations. Refresh rereads the inbox; it cannot independently query an idle subscription. An installed bridge with no observation is `waiting`, with clear UI instructions. Never start a model turn solely to populate the tracker.
+Claude is a passive terminal status-line integration. Desktop/website use alone does not prove that this bridge receives data. Refresh rereads the inbox; it cannot independently query an idle subscription. An installed bridge with no observation is `waiting`, with its reason visible in the sidebar. Never start a model turn solely to populate the tracker. Automatic polling must not advance the manual-refresh cooldown: a five-second passive poll would otherwise perpetually extend a ten-second click cooldown. Anthropic documents the input and its subscription/first-response conditions at https://code.claude.com/docs/en/statusline.
 
 ### Cursor
 
