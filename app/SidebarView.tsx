@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { Activity, ArrowUpRight, Moon, PanelRight, Pencil, RefreshCw, Sun, X } from 'lucide-react';
-import type { DashboardSnapshot, Membership, ProviderId, ProviderState } from '../shared/schema';
-import { MembershipSchema } from '../shared/schema';
+import { useEffect, useState } from 'react';
+import { Activity, ArrowUpRight, Moon, PanelRight, RefreshCw, Sun } from 'lucide-react';
+import type { DashboardSnapshot, ProviderId } from '../shared/schema';
+import { MembershipButton, MembershipDialog } from './Membership';
 import { Badge, ProviderMark, connectionCopy } from './components';
 import { countdown, dateTime, nativeAmount, percentage, providerHealth, relativeTime, resetPassed } from './display';
-import { errorMessage, request, RequestError } from './api';
 import './sidebar.css';
 
 type WindowState = { autoHide: boolean; hidden: boolean };
@@ -12,50 +11,6 @@ declare global {
   interface Window {
     trackerDesktop?: { openDashboard(): Promise<void>; getWindowState?(): Promise<WindowState>; setAutoHide?(value: boolean): Promise<WindowState>; setInteractionHold?(value: boolean): Promise<void>; onWindowState?(callback: (state: WindowState) => void): () => void };
   }
-}
-export function subscriptionPrice(membership: Membership): string {
-  if (membership.price === null) return 'Price Unknown';
-  const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: membership.currency }).format(membership.price);
-  return `${amount}${membership.billingPeriod === 'month' ? ' / month' : membership.billingPeriod === 'year' ? ' / year' : ' · Period Unknown'}`;
-}
-
-function MembershipDialog({ provider, snapshot, reload, onClose }: { provider: ProviderState; snapshot: DashboardSnapshot; reload: () => Promise<DashboardSnapshot | null>; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const [plan, setPlan] = useState(provider.membership.plan ?? '');
-  const [price, setPrice] = useState(provider.membership.price?.toString() ?? '');
-  const [currency, setCurrency] = useState(provider.membership.currency);
-  const [billingPeriod, setPeriod] = useState(provider.membership.billingPeriod);
-  const [revision, setRevision] = useState(snapshot.revision);
-  const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
-  useEffect(() => { ref.current?.showModal(); }, []);
-  async function save(event: React.FormEvent) {
-    event.preventDefault(); setError('');
-    const parsed = MembershipSchema.safeParse({ plan: plan.trim() || null, price: price.trim() === '' ? null : Number(price), currency: currency.toUpperCase(), billingPeriod });
-    if (!parsed.success) { setError('Enter a valid price and a three-letter currency code, such as USD.'); return; }
-    setSaving(true);
-    try { await request(`/providers/${provider.id}/membership`, { method: 'PUT', revision, body: parsed.data }); await reload(); onClose(); }
-    catch (failure) {
-      if (failure instanceof RequestError && failure.status === 412) {
-        const latest = await reload();
-        if (latest) setRevision(latest.revision);
-        setError('The tracker changed while you were editing. Your entries are preserved. Review them, then Save Membership again.');
-      } else setError(errorMessage(failure));
-    } finally { setSaving(false); }
-  }
-  return <dialog className="membership-dialog" ref={ref} onCancel={event => { if (saving) event.preventDefault(); else onClose(); }} aria-labelledby="membership-title">
-    <form onSubmit={save}>
-      <header><h2 id="membership-title">{provider.name} Membership</h2><button type="button" className="button icon-button" disabled={saving} onClick={onClose} aria-label="Close Membership"><X size={18} /></button></header>
-      <p>Enter your plan and the price you actually pay. These details stay on this PC and do not change your subscription or quota.</p>
-      <label>Membership / Plan<input autoFocus value={plan} maxLength={160} onChange={event => setPlan(event.target.value)} placeholder="Plan Name" /></label>
-      <label>Subscription Price<input type="number" min="0" step="any" value={price} onChange={event => setPrice(event.target.value)} placeholder="Unknown" /></label>
-      <div className="membership-fields"><label>Currency<input value={currency} maxLength={3} pattern="[A-Za-z]{3}" required onChange={event => setCurrency(event.target.value.toUpperCase())} /></label>
-      <label>Billing Period<select value={billingPeriod} onChange={event => setPeriod(event.target.value as Membership['billingPeriod'])}><option value="unknown">Unknown</option><option value="month">Monthly</option><option value="year">Yearly</option></select></label></div>
-      <p className="small-label">Leave plan or price blank when unknown. A price of 0 means free.</p>
-      {error && <p className="error-text" role="alert">{error}</p>}
-      <footer><button type="button" className="button secondary" disabled={saving} onClick={onClose}>Cancel</button><button className="button primary" disabled={saving}>{saving ? 'Saving…' : 'Save Membership'}</button></footer>
-    </form>
-  </dialog>;
 }
 
 export function SidebarView({ snapshot, now, theme, toggleTheme, busy, refresh, connect, reload, loadError, notice }: {
@@ -113,7 +68,7 @@ export function SidebarView({ snapshot, now, theme, toggleTheme, busy, refresh, 
       const windows = provider.observation?.windows ?? [];
       return <article className="sidebar-account" key={provider.id} aria-labelledby={`compact-${provider.id}`}>
         <header><div className="sidebar-account-name"><ProviderMark id={provider.id} small /><h2 id={`compact-${provider.id}`}>{provider.name}</h2></div><Badge tone={health.tone}>{health.label}</Badge></header>
-        <button className="sidebar-membership" aria-label={`Edit ${provider.name} Membership`} onClick={() => setEditing(provider.id)}><span><strong>{provider.membership.plan || 'Membership Unknown'}</strong><small>{subscriptionPrice(provider.membership)}{provider.membership.plan || provider.membership.price !== null ? ' · Your Entry' : ''}</small></span><Pencil size={14} /></button>
+        <MembershipButton provider={provider} compact onEdit={() => setEditing(provider.id)} />
         {windows.length === 0 ? <div className="sidebar-quota-empty"><strong>Usage Unknown</strong><span>Quota Refresh Unknown</span><p>{connectionCopy[provider.id].summary}</p></div> : windows.map(quota => <section className={`sidebar-quota ${resetPassed(quota, now) ? 'historical-reading' : ''}`} key={quota.key}>
           <div className="sidebar-quota-title"><strong>{quota.label}{quota.scope === 'team' ? ' · Team' : ''}</strong><span>{quota.kind === 'spend' ? 'Separate Spending' : quota.usedPercent === null ? 'Usage Unknown' : `${percentage(quota.usedPercent)} Used`}</span></div>
           {quota.kind === 'quota' && (quota.usedPercent === null ? <div className="unknown-track" aria-label="Usage Unknown" /> : <div className={`progress-track ${quota.usedPercent >= 100 ? 'danger' : quota.usedPercent >= snapshot.settings.warningPercent ? 'warning' : 'accent'}`} role="progressbar" aria-label={`${provider.name} ${quota.label} Used`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, quota.usedPercent)} aria-valuetext={`${percentage(quota.usedPercent)} used`}><span style={{ width: `${Math.min(100, quota.usedPercent)}%` }} /></div>)}

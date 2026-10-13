@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight, Check, ChevronRight, CircleAlert, Clock3, Cod
 import type { DashboardSnapshot, ProviderId, ProviderState, QuotaWindow, UsageAction } from '../shared/schema';
 import { countdown, dateTime, nativeAmount, percentage, providerHealth, relativeTime, remaining, resetPassed, sourceNames } from './display';
 import { request, errorMessage } from './api';
+import { MembershipButton, MembershipDialog } from './Membership';
 
 export const connectionCopy: Record<ProviderId, { summary: string; limitation: string; what: string; why: string; user: string; action: string }> = {
   claude: {
@@ -60,12 +61,15 @@ function WindowReading({ window, now, timezone, warningPercent, disconnected }: 
   </section>;
 }
 
-export function ProviderCard({ provider, snapshot, now, busy, onConnect, onRefresh }: { provider: ProviderState; snapshot: DashboardSnapshot; now: number; busy: boolean; onConnect: () => void; onRefresh: () => void }) {
+export function ProviderCard({ provider, snapshot, now, busy, onConnect, onRefresh, reload }: { provider: ProviderState; snapshot: DashboardSnapshot; now: number; busy: boolean; onConnect: () => void; onRefresh: () => void; reload: () => Promise<DashboardSnapshot | null> }) {
+  const [editingMembership, setEditingMembership] = useState(false);
   const health = providerHealth(provider, now, snapshot.settings.staleAfterMinutes);
   const windows = provider.observation?.windows ?? [];
   const modes = { automatic: 'Automatic', passive: 'During Claude Use', experimental: 'Experimental' };
   return <article className={`provider-card provider-${provider.id}`} aria-labelledby={`provider-${provider.id}`}>
     <header className="provider-heading"><div className="provider-identity"><ProviderMark id={provider.id} /><div><h3 id={`provider-${provider.id}`}>{provider.name}</h3><span className="provider-mode">{modes[provider.mode]}</span></div></div><Badge tone={health.tone}>{health.label}</Badge></header>
+    <MembershipButton provider={provider} onEdit={() => setEditingMembership(true)} />
+    {editingMembership && <MembershipDialog provider={provider} snapshot={snapshot} reload={reload} onClose={() => setEditingMembership(false)} />}
     <div className="provider-content">
       {windows.length > 0 ? <div className="window-list">{windows.filter(window => window.kind === 'quota').map(window => <WindowReading key={window.key} window={window} now={now} timezone={snapshot.settings.timezone} warningPercent={snapshot.settings.warningPercent} disconnected={!provider.enabled} />)}{windows.filter(window => window.kind === 'spend').map(window => <WindowReading key={window.key} window={window} now={now} timezone={snapshot.settings.timezone} warningPercent={snapshot.settings.warningPercent} disconnected={!provider.enabled} />)}</div> : <div className="provider-empty"><span className="empty-provider-symbol"><Plug size={22} /></span><h4>{provider.status === 'connecting' ? 'Connecting Your Account' : provider.status === 'waiting' ? 'Waiting for a Reading' : 'No Reading Yet'}</h4><p>{connectionCopy[provider.id].summary}</p></div>}
       {provider.message && provider.enabled && <p className={`provider-message ${provider.status === 'error' ? 'error-text' : ''}`}><Info size={14} /><span>{provider.message}</span></p>}

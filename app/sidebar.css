@@ -1,4 +1,4 @@
-.usage-sidebar, .membership-dialog { --border: var(--line); --text: var(--ink); }
+.usage-sidebar { --border: var(--line); --text: var(--ink); }
 .usage-sidebar { max-width: 480px; min-height: 100dvh; margin: 0 auto; padding: 18px 14px; }
 .usage-sidebar-header > div { display: flex; align-items: center; gap: 9px; }
 .usage-sidebar-header h1 { font-size: 20px; margin: 0; letter-spacing: -.5px; }
@@ -39,15 +39,3 @@
 .usage-sidebar-footer .button { width: 100%; font-size: 12px; }
 .usage-sidebar-footer p { font-size: 10px; opacity: .65; line-height: 1.5; }
 .usage-sidebar .notice { padding: 9px; font-size: 12px; margin-bottom: 10px; }
-.membership-dialog { width: min(390px, calc(100vw - 24px)); max-height: calc(100dvh - 30px); overflow: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-.membership-dialog::backdrop { background: #15243b99; }
-.membership-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.membership-dialog h2 { font-size: 18px; margin: 0; }
-.membership-dialog p { font-size: 12px; line-height: 1.6; }
-.membership-dialog label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; margin: 14px 0; }
-.membership-dialog input, .membership-dialog select { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: inherit; padding: 10px; font: inherit; }
-.membership-dialog input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
-.membership-dialog input[type="number"]::-webkit-inner-spin-button,
-.membership-dialog input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.membership-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.membership-dialog footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }

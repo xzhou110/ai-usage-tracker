@@ -22,7 +22,7 @@ Turn **Auto-Hide** On using the button in the original toolbar position. The app
 
 **Open Full Dashboard** opens history, settings, and connection details in the browser. Closing the sidebar stops a server it started; a separately started `npm start` server keeps running. Browser previews cannot control desktop positioning. The **ai-usage-tracker** launch configuration remains available for browser-only use.
 
-Click a provider's membership row to enter your actual plan, subscription price, currency, and monthly/yearly billing period. These entries remain local and are labelled **Your Entry**. Blank means unknown; 0 means free. Plan names and prices are not automatically detected in this release. They do not change billing or estimate quota. The sidebar shows every provider-reported quota window and reset time; unknown and expired readings remain explicit.
+Each provider card in the web Overview and Windows sidebar shows the same saved plan, subscription price, currency, and billing period. Click its membership row or pencil to edit these details in either view; both views share the local record and receive saved updates. These entries remain local and are labelled **Your Entry**. Blank means unknown; 0 means free. Plan names and prices are not automatically detected in this release. They do not change billing or estimate quota. The sidebar shows every provider-reported quota window and reset time; unknown and expired readings remain explicit.
 
 ## Connect Your Apps
 

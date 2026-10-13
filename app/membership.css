@@ -1,0 +1,19 @@
+.provider-membership { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 20px; padding: 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface-soft); color: var(--ink); text-align: left; cursor: pointer; }
+.provider-membership:hover { border-color: var(--muted); }
+.provider-membership > span { min-width: 0; }
+.provider-membership strong { display: block; font-size: 14px; overflow-wrap: anywhere; }
+.provider-membership small { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.provider-membership svg { flex-shrink: 0; }
+.membership-dialog { --border: var(--line); --text: var(--ink); }
+.membership-dialog { width: min(390px, calc(100vw - 24px)); max-height: calc(100dvh - 30px); overflow: auto; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+.membership-dialog::backdrop { background: #15243b99; }
+.membership-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.membership-dialog h2 { font-size: 18px; margin: 0; }
+.membership-dialog p { font-size: 12px; line-height: 1.6; }
+.membership-dialog label { display: grid; gap: 6px; font-size: 12px; font-weight: 600; margin: 14px 0; }
+.membership-dialog input, .membership-dialog select { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: inherit; padding: 10px; font: inherit; }
+.membership-dialog input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.membership-dialog input[type="number"]::-webkit-inner-spin-button,
+.membership-dialog input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.membership-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.membership-dialog footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
