@@ -28,7 +28,3 @@ Read PROJECT.md and PRD.md first. This project lives directly under D:/Meaningfu
 - Security, authentication, permissions, payments, privacy, and data migration/loss: deeper targeted tests and independent review regardless of patch size; broaden if impact crosses the app.
 - Stop once relevant checks pass. Repeat or expand only for new changes, failures, or unresolved risks. Cheap existing suites do not automatically trigger a full QA sweep.
 - Keep privacy/secret publication gates enabled. Report actual checks and material gaps; distinguish fixtures from live connector validation. Never start model turns just to test quota.
-
-## Workspace Map
-
-Read the workspace map `D:/Meaningful/AI/AGENTS.md` (the project index and the workspace conventions) and this folder's `PROJECT.md` before working here; the rules above apply only inside this project.
