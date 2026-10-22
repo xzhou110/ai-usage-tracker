@@ -12,7 +12,7 @@ The app stays in `D:/Meaningful/AI/ai-usage-tracker`; these shortcuts point ther
 
 ## Set Up a Fresh Checkout
 
-With Node 24 installed, run `npm install`, then `npm run build`, then `npm start` from this folder. Installation fetches the app's dependencies; the build produces the browser interface; start serves it on [127.0.0.1:8175](http://127.0.0.1:8175). The server binds only to your machine.
+With Node 24 installed, run `npm install`, then `npm run build`, then `npm start` from this folder. Installation fetches the app's dependencies, among them the shared server runtime `@xuseak/local-app-kit` from its public GitHub repository at the tag pinned in package.json (no account or token needed); the build produces the browser interface; start serves it on [127.0.0.1:8175](http://127.0.0.1:8175). The server binds only to your machine.
 
 For the Windows sidebar, run `npm run setup:desktop` once to download the official Electron runtime, then double-click **Start-AI-Usage-Sidebar.vbs** (no terminal window) or **Start-AI-Usage-Tracker.cmd**. `npm run sidebar` does the same from a terminal. On a Windows machine with TLS inspection, set `$env:NODE_USE_SYSTEM_CA='1'` before installation so Node uses Windows' trusted certificates. Setup is already complete on this PC; these commands are for a fresh checkout.
 

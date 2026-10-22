@@ -21,7 +21,7 @@ XuSeak AI Usage Tracker brings Claude, Codex, and Cursor allowances into one pri
 | Item | Value |
 |---|---|
 | Kind | Personal usage dashboard |
-| Stack | React + TypeScript + Vite, local Node 24 server, Zod |
+| Stack | React + TypeScript + Vite, Zod, local Node 24 server on `@xuseak/local-app-kit` v0.1.0 (the shared local-app runtime: atomic writes, server lock, localhost guards, static handler, SSE; pinned by tag, see DECISIONS.md 2026-10-22) |
 | Windows Host | Electron sidebar; Start search or Desktop shortcut named AI Usage Tracker |
 | Local Path | `D:/Meaningful/AI/ai-usage-tracker` |
 | Run | npm run build, then npm start; loopback port 8175 |
@@ -53,9 +53,10 @@ Provider adapters normalize quota observations into separate windows. A local se
 Read PRD.md and STATE.md first. Prove data access before promising automatic collection. Follow the proportional verification tiers in AGENTS.md: focused checks for small asks, full production QA for major updates and app completion/release milestones, and deeper targeted review for high-risk changes. Live reconciliation is required before claiming a connector is verified; unrelated edits do not require repeating it.
 
 ### Current State and Open Items
-Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude Desktop Code was confirmed as the intended surface; a local mod is installed and the ineffective terminal wrapper restored. Native mod tests, local receiver tests, and independent privacy review passed; an actual Desktop reading and reconciliation remain pending. Background polls no longer extend the manual refresh cooldown. Cursor's automated sign-in failed and was replaced; real extension reconciliation remains pending. See test-report.md and STATE.md for precise coverage.
+Production UI and synthetic integration tests passed. Codex percentages, duration, and reset instants matched the desktop account source after Refresh. Claude Desktop Code was confirmed as the intended surface; a local mod is installed and the ineffective terminal wrapper restored. Native mod tests, local receiver tests, and independent privacy review passed; an actual Desktop reading and reconciliation remain pending. Background polls no longer extend the manual refresh cooldown. Cursor's automated sign-in failed and was replaced; real extension reconciliation remains pending. See test-report.md and STATE.md for precise coverage. Open since 2026-10-22: lint is not part of `npm run check` yet, because `typescript-eslint` supports TypeScript below 6.1 and this app type-checks with 7; the choice (TypeScript 6 for lint, or wait) is fleet-wide and belongs to the retrofit of all apps.
 
 ### Change Highlights
+- 2026-10-22 — Server runtime moved onto the shared `@xuseak/local-app-kit` v0.1.0 (atomic writes, server lock, localhost guards, static handler, SSE), pinned by tag; `npm run check` made real with the GitHub check gate and Dependabot; lint deferred (DECISIONS.md).
 - 2026-10-05 — Created project home and initial PRD before application code.
 - 2026-10-05 — Built and validated the private dashboard; renamed all code and documentation to AI Usage Tracker in D:/Meaningful/AI/ai-usage-tracker. Enabled quota connections and prepared private source backup without runtime data.
 
