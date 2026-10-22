@@ -10,8 +10,13 @@
     "sidebar": "electron desktop/main.cjs",
     "setup:desktop": "install-electron --no",
     "test": "vitest run",
-    "check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test && vite build",
+    "audit:deps": "npm audit --omit=dev --audit-level=high",
     "test:connectors": "vitest run server/connectors tools"
+  },
+  "engines": {
+    "node": ">=24"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

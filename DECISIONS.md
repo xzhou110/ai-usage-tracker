@@ -1,5 +1,9 @@
 # Decisions
 
+## 2026-10-22 — Command Surface and Gate (Engineering Standard, Retrofit Steps 1 and 2)
+- `npm run check` now means the type check, the tests and the production bundle (`tsc --noEmit`, `vitest run`, `vite build`), with `typecheck` as its own script and Node pinned at 24 or newer in `engines`. Before, `check` was the type check alone. The global pre-push hook and the new `.github/workflows/check.yml` run it on every push; the workflow's `audit` job reports known vulnerabilities in shipped dependencies (`npm run audit:deps`) and never gates. `.github/dependabot.yml` proposes one grouped pull request a month for minor and patch updates, tested by the gate.
+- Lint is deferred: the standard's ESLint boundaries need `typescript-eslint`, which supports TypeScript below 6.1, and this app type-checks with TypeScript 7. Whether the TypeScript 7 apps move to 6 for lint or wait for `typescript-eslint` is a fleet-wide choice for the retrofit of all apps, recorded as open in PROJECT.md, not part of this change.
+
 ## 2026-10-05 — Normal-Browser Cursor Connection and Upper-Right Hiding
 - Owner confirmed sign-in works in normal Chrome/Edge. Replace automated login with a local MV3 extension, isolated quota-only content script, and a one-use pairing code. Only two write-only localhost routes accept extension Origins; tokens are hashed locally and bound to that Origin. No cookies API, browser credential copying, or remote telemetry.
 - Keep the signed-in dashboard tab open for five-minute reads; disclose browser sleeping/closure. Installation and live reconciliation remain required. Use the official Chrome extension network/storage model: https://developer.chrome.com/docs/extensions/develop/concepts/network-requests and https://developer.chrome.com/docs/extensions/reference/api/storage .
