@@ -1,15 +1,14 @@
-import http from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import { acquireServerLock, checkMutation, createEventHub, createStaticHandler, hostAllowed, listenLoopback, originAllowed, parseRequestTarget, readJsonBody } from '@xuseak/local-app-kit';
+import type { Handler } from '@xuseak/local-app-kit';
 import { SettingsSchema, ProviderIdSchema, MembershipSchema } from '../shared/schema.ts';
 import type { Connectors, DashboardSnapshot } from '../shared/schema.ts';
 import { AppError } from './errors.ts';
 import { StateStore } from './store.ts';
 import { ProviderService } from './providers.ts';
-import { acquireLock } from './lock.ts';
 import { CursorConnector, parseCursorPayload } from './connectors/cursor.ts';
 import { extensionOrigin } from './connectors/cursor-browser.ts';
 
@@ -28,7 +27,11 @@ export interface ServerOptions {
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MAX_BODY_BYTES = 1024 * 1024;
 const emptyBody = z.object({}).strict();
-const mime: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.woff': 'font/woff', '.woff2': 'font/woff2' };
+const CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
+const EXTRA_HEADERS = { 'x-frame-options': 'DENY', 'permissions-policy': 'camera=(), microphone=(), geolocation=()' };
+/** The pages the single-page app owns; any other extension-less path is a 404, never index.html. */
+const ROUTES = ['/', '/dashboard', '/history', '/actions', '/connections', '/settings'];
+const MUTATION_HEADER = 'x-ai-usage-tracker';
 
 function commonHeaders(response: ServerResponse): void {
   response.setHeader('Cache-Control', 'no-store');
@@ -36,7 +39,7 @@ function commonHeaders(response: ServerResponse): void {
   response.setHeader('X-Frame-Options', 'DENY');
   response.setHeader('Referrer-Policy', 'no-referrer');
   response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+  response.setHeader('Content-Security-Policy', CSP);
 }
 
 function json(response: ServerResponse, status: number, value: unknown, head = false): void {
@@ -58,62 +61,32 @@ function fail(response: ServerResponse, error: unknown, head = false): void {
   json(response, safe.status, { error: { code: safe.code, message: safe.message } }, head);
 }
 
-function parseTarget(request: IncomingMessage): URL {
-  const raw = request.url ?? '';
-  if (!raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\') || raw.includes('#') || /[\u0000-\u0020\u007f]/.test(raw)) throw new AppError(400, 'BAD_REQUEST', 'The request target is invalid.');
-  try {
-    // Validate before URL normalization can erase traversal segments.
-    const decoded = decodeURIComponent(raw.split('?')[0]);
-    if (decoded.includes('\\') || decoded.includes(':') || decoded.includes('%') || decoded.startsWith('//') || /[\u0000-\u001f\u007f]/.test(decoded)) throw new Error();
-    const segments = decoded.split('/').filter(Boolean);
-    if (segments.some(segment => segment.startsWith('.') || /[. ]$/.test(segment) || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment))) throw new Error();
-    const url = new URL(raw, 'http://127.0.0.1');
-    // Query decoding must also reject malformed escapes rather than silently substituting them.
-    decodeURIComponent(url.search.replaceAll('+', ' '));
-    return url;
-  } catch { throw new AppError(400, 'BAD_REQUEST', 'The request target is invalid.'); }
+/** The kit validates the raw target before URL normalisation can erase traversal; every bad shape is a 400 here. */
+function parseTarget(request: IncomingMessage, port: number): URL {
+  const target = parseRequestTarget(request.url, port);
+  if (!target.ok) throw new AppError(400, 'BAD_REQUEST', 'The request target is invalid.');
+  return target.url;
 }
 
+/** Host and Origin on every request, the tracker header and a JSON body on mutations: the kit's checks, this app's wording. */
 function guard(request: IncomingMessage, port: number, devOrigin?: string): void {
-  const host = request.headers.host;
-  if (!host || ![`127.0.0.1:${port}`, `localhost:${port}`, `[::1]:${port}`].includes(host)) throw new AppError(403, 'FORBIDDEN', 'Only this local tracker can access this endpoint.');
-  const origin = request.headers.origin;
-  if (origin !== undefined && origin !== `http://${host}` && origin !== devOrigin) throw new AppError(403, 'FORBIDDEN', 'The request origin is not allowed.');
-  if (!['GET', 'HEAD'].includes(request.method ?? '')) {
-    if (request.headers['x-ai-usage-tracker'] !== '1') throw new AppError(403, 'FORBIDDEN', 'The tracker request header is required.');
-    if (!/^application\/json(?:\s*;\s*charset\s*=\s*utf-8)?$/i.test(request.headers['content-type'] ?? '')) throw new AppError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Use a JSON request body.');
+  const extraOrigins = devOrigin ? [devOrigin] : [];
+  if (!hostAllowed(request, port)) throw new AppError(403, 'FORBIDDEN', 'Only this local tracker can access this endpoint.');
+  if (!originAllowed(request, port, extraOrigins)) throw new AppError(403, 'FORBIDDEN', 'The request origin is not allowed.');
+  const mutation = checkMutation(request, { port, header: MUTATION_HEADER, requireJson: true, extraOrigins });
+  if (!mutation.ok) {
+    if (mutation.status === 415) throw new AppError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Use a JSON request body.');
+    throw new AppError(403, 'FORBIDDEN', 'The tracker request header is required.');
   }
 }
 
+/** The kit reads the body (413 while draining an oversized one, never an echo of a malformed one); the envelope is this app's. */
 async function body(request: IncomingMessage, limit = MAX_BODY_BYTES): Promise<unknown> {
-  const declared = request.headers['content-length'];
-  if (declared && Number(declared) > limit) {
-    request.resume();
-    throw new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds its transport size limit.');
-  }
-  return new Promise((resolve, reject) => {
-    let total = 0;
-    let rejected = false;
-    const chunks: Buffer[] = [];
-    request.on('data', (chunk: Buffer) => {
-      if (rejected) return;
-      total += chunk.length;
-      if (total > limit) {
-        rejected = true;
-        chunks.length = 0;
-        reject(new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds its transport size limit.'));
-        return;
-      }
-      chunks.push(chunk);
-    });
-    request.on('end', () => {
-      if (rejected) return;
-      try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))); }
-      catch { reject(new AppError(400, 'BAD_REQUEST', 'The JSON request body is invalid.')); }
-    });
-    request.on('aborted', () => reject(new AppError(400, 'BAD_REQUEST', 'The request was interrupted.')));
-    request.on('error', () => reject(new AppError(400, 'BAD_REQUEST', 'The request body could not be read.')));
-  });
+  const result = await readJsonBody(request, limit);
+  if (result.ok) return result.value;
+  if (result.status === 413) throw new AppError(413, 'PAYLOAD_TOO_LARGE', 'The request exceeds its transport size limit.');
+  const message = result.reason === 'interrupted' ? 'The request was interrupted.' : result.reason === 'unreadable' ? 'The request body could not be read.' : 'The JSON request body is invalid.';
+  throw new AppError(400, 'BAD_REQUEST', message);
 }
 
 function expectedRevision(request: IncomingMessage): string {
@@ -128,43 +101,25 @@ function validate<T>(schema: z.ZodType<T>, value: unknown): T {
   return result.data;
 }
 
-async function serveStatic(request: IncomingMessage, response: ServerResponse, pathname: string, distDir: string): Promise<void> {
-  if (!['GET', 'HEAD'].includes(request.method ?? '')) throw new AppError(404, 'NOT_FOUND', 'This route does not exist.');
-  const decoded = decodeURIComponent(pathname);
-  const routes = new Set(['/', '/dashboard', '/history', '/actions', '/connections', '/settings']);
-  const relative = routes.has(decoded) ? 'index.html' : decoded.slice(1);
-  if (!relative || !path.extname(relative)) throw new AppError(404, 'NOT_FOUND', 'This page does not exist.');
-  try {
-    const base = await realpath(distDir);
-    const candidate = await realpath(path.resolve(base, relative));
-    const contained = path.relative(base, candidate);
-    if (!contained || contained.startsWith('..') || path.isAbsolute(contained) || !(await stat(candidate)).isFile()) throw new Error();
-    const extension = path.extname(candidate).toLowerCase();
-    if (!mime[extension]) throw new Error();
-    const bytes = await readFile(candidate);
-    response.statusCode = 200;
-    response.setHeader('Content-Type', mime[extension]);
-    response.setHeader('Content-Length', bytes.length);
-    response.end(request.method === 'HEAD' ? undefined : bytes);
-  } catch { throw new AppError(404, 'NOT_FOUND', 'This file is unavailable. Build the app before opening it.'); }
-}
-
 export async function startServer(options: ServerOptions) {
   const root = path.resolve(options.root);
   const requestedPort = options.port ?? 8175;
   if (!Number.isInteger(requestedPort) || requestedPort < 0 || requestedPort > 65535) throw new AppError(400, 'BAD_REQUEST', 'Choose a valid local port.');
   if (options.devOrigin && !/^http:\/\/127\.0\.0\.1:\d+$/.test(options.devOrigin)) throw new AppError(400, 'BAD_REQUEST', 'Development origin must be an explicit loopback origin.');
-  const unlock = await acquireLock(root, requestedPort);
+  const lock = await acquireServerLock(path.join(root, 'local'), { port: requestedPort, appName: 'AI Usage Tracker' });
+  if (!lock.ok) throw lock.reason === 'io' ? new AppError(500, 'STORAGE_ERROR', lock.message) : new AppError(409, 'CONFLICT', lock.message);
+  const unlock = lock.release;
   const store = new StateStore(root);
   const providers = new ProviderService(store, options.connectors, options.throttleMs);
-  const events = new Set<ServerResponse>();
+  const events = createEventHub({ heartbeatMs: 15_000 });
   let port = requestedPort;
   let closed = false;
   let unsubscribe = () => {};
-  const server = http.createServer((request, response) => {
+  // The API handler. The kit's static handler sits in front of it: Host check, request-target check, dist/ for pages.
+  const api: Handler = (request, response) => {
     commonHeaders(response);
     const handle = async () => {
-      const target = parseTarget(request);
+      const target = parseTarget(request, port);
       const pathname = decodeURIComponent(target.pathname);
       const method = request.method ?? 'GET';
       // Only these two write-only routes accept an extension Origin. The rest of
@@ -197,7 +152,6 @@ export async function startServer(options: ServerOptions) {
       guard(request, port, options.devOrigin);
       const head = method === 'HEAD';
       const get = method === 'GET' || head;
-      if (!pathname.startsWith('/api/') && pathname !== '/api') return serveStatic(request, response, target.pathname, options.distDir ?? path.join(projectRoot, 'dist'));
       if (get && pathname === '/api/health') {
         providers.checkHealth();
         await store.snapshot();
@@ -245,17 +199,7 @@ export async function startServer(options: ServerOptions) {
         return;
       }
       if (get && pathname === '/api/events') {
-        response.statusCode = 200;
-        response.setHeader('Content-Type', 'text/event-stream');
-        response.setHeader('Connection', 'keep-alive');
-        response.setHeader('X-Accel-Buffering', 'no');
-        if (head) { response.end(); return; }
-        response.flushHeaders();
-        response.write(': connected\n\n');
-        events.add(response);
-        const timer = setInterval(() => { if (!response.write(': heartbeat\n\n')) response.end(); }, 15_000);
-        timer.unref();
-        response.on('close', () => { clearInterval(timer); events.delete(response); });
+        events.open(request, response);
         return;
       }
       const providerRoute = pathname.match(/^\/api\/providers\/([^/]+)\/(connect|disconnect|refresh)$/);
@@ -306,26 +250,22 @@ export async function startServer(options: ServerOptions) {
       request.resume();
       fail(response, error, request.method === 'HEAD');
     });
-  });
-  server.requestTimeout = 30_000;
-  server.headersTimeout = 15_000;
-  server.on('clientError', (_error, socket) => {
-    if (socket.writable) socket.end('HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n');
-  });
+  };
+  // The front handler is assembled once the port is known (port 0 in tests picks a free one); nothing can arrive before.
+  let serve: Handler = (_request, response) => { response.statusCode = 503; response.end(); };
+  let listening!: Extract<Awaited<ReturnType<typeof listenLoopback>>, { ok: true }>;
   try {
     await store.initialize(options.watch ?? true);
     await providers.start(options.poll ?? true);
-    unsubscribe = store.subscribe(revision => {
-      const event = `event: change\ndata: ${JSON.stringify({ revision })}\n\n`;
-      for (const response of events) if (!response.write(event)) response.end();
+    unsubscribe = store.subscribe(revision => { events.broadcast('change', { revision }); });
+    const result = await listenLoopback({ port: requestedPort, handler: (request, response) => serve(request, response), requestTimeoutMs: 30_000, headersTimeoutMs: 15_000, log: () => {} });
+    if (!result.ok) throw new Error(result.message);
+    listening = result;
+    port = result.port;
+    serve = createStaticHandler({
+      dist: options.distDir ?? path.join(projectRoot, 'dist'), port, api, fallback: ROUTES, assetCache: 'no-store', csp: CSP, headers: EXTRA_HEADERS,
+      missingDistMessage: 'This file is unavailable. Build the app before opening it.',
     });
-    await new Promise<void>((resolve, reject) => {
-      server.once('error', reject);
-      server.listen(requestedPort, '127.0.0.1', () => { server.off('error', reject); resolve(); });
-    });
-    const address = server.address();
-    if (!address || typeof address === 'string') throw new Error();
-    port = address.port;
   } catch (error) {
     unsubscribe();
     await providers.close().catch(() => {});
@@ -337,12 +277,11 @@ export async function startServer(options: ServerOptions) {
     if (closed) return;
     closed = true;
     unsubscribe();
-    for (const response of events) response.end();
-    const stopped = new Promise<void>((resolve, reject) => { server.close(error => error ? reject(error) : resolve()); server.closeIdleConnections(); });
+    events.close();
     let failure: unknown;
     try { await providers.close(); } catch (error) { failure = error; }
-    try { await stopped; await store.close(); } finally { await unlock(); }
+    try { await listening.close(); await store.close(); } finally { await unlock(); }
     if (failure) throw failure;
   };
-  return { server, store, providers, port, url: `http://127.0.0.1:${port}`, close };
+  return { server: listening.server, store, providers, port, url: listening.url, close };
 }

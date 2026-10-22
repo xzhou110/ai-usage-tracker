@@ -5,12 +5,17 @@ import { mkdir, readFile, readdir, open } from 'node:fs/promises';
 import path from 'node:path';
 import { initialState, StateSchema, ObservationSchema, providerIds } from '../shared/schema.ts';
 import type { StoredState, Observation, DashboardSnapshot, HistoryPage, ProviderId } from '../shared/schema.ts';
-import { writeAtomic } from './atomic.ts';
+import { writeAtomic } from '@xuseak/local-app-kit/atomic-write';
 import { AppError, errorCode, storageError } from './errors.ts';
 import { reconcileActions } from './actions.ts';
 
 const hash = (bytes: string) => createHash('sha256').update(bytes).digest('hex');
 const serialize = (state: StoredState) => `${JSON.stringify(state, null, 2)}\n`;
+/** The kit's atomic write with no precondition (the revision check runs before it); any failure keeps the previous file. */
+async function saveAtomically(file: string, bytes: string): Promise<void> {
+  const result = await writeAtomic(file, bytes, { ifMatch: '*' });
+  if (!result.ok) throw storageError();
+}
 type Reader = { state: StoredState; bytes: string; revision: string };
 
 export function validateState(value: unknown): StoredState {
@@ -126,7 +131,7 @@ export class StateStore {
         if (JSON.stringify(state) !== JSON.stringify(current.state)) {
           // Detect edits that arrived while an asynchronous transaction was in progress.
           if ((await this.read()).revision !== current.revision) throw new AppError(412, 'PRECONDITION_FAILED', 'Data changed on disk. Reload before trying again.');
-          await writeAtomic(this.statePath, bytes);
+          await saveAtomically(this.statePath, bytes);
           revision = hash(bytes);
         }
         this.fault = null;
@@ -151,7 +156,7 @@ export class StateStore {
       const normalized = { ...validated, id: randomUUID() };
       const directory = path.join(this.root, 'local', 'history', validated.provider);
       await mkdir(directory, { recursive: true });
-      await writeAtomic(path.join(directory, `${normalized.id}.json`), `${JSON.stringify(normalized, null, 2)}\n`);
+      await saveAtomically(path.join(directory, `${normalized.id}.json`), `${JSON.stringify(normalized, null, 2)}\n`);
       return normalized;
     }
     return { ...validated, id: provider.observation!.id };

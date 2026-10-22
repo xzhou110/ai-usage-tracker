@@ -12,7 +12,6 @@ import { reconcileActions } from './actions.ts';
 import { StateStore } from './store.ts';
 import { ConnectorError } from './connectors/errors.ts';
 import { CursorConnector } from './connectors/cursor.ts';
-import { acquireLock } from './lock.ts';
 import { ProviderService } from './providers.ts';
 
 const cleanup: (() => Promise<unknown>)[] = [];
@@ -373,53 +372,9 @@ describe('State, Provider, and Action Behavior', () => {
   });
 });
 
-describe('Single-Writer Lock Recovery', () => {
-  const deadPid = 2_147_483_647;
-
-  it('allows exactly one owner across repeated simultaneous stale-lock recoveries', async () => {
-    const root = await temporary();
-    const directory = path.join(root, 'local');
-    await mkdir(directory);
-    expect(() => process.kill(deadPid, 0)).toThrow();
-    for (let round = 0; round < 25; round++) {
-      await writeFile(path.join(directory, 'server.lock'), JSON.stringify({ pid: deadPid, port: 0, token: `dead-${round}` }));
-      const contenders = await Promise.allSettled(Array.from({ length: 12 }, () => acquireLock(root, 0)));
-      const owners = contenders.filter((result): result is PromiseFulfilledResult<() => Promise<void>> => result.status === 'fulfilled');
-      try {
-        expect(owners).toHaveLength(1);
-        for (const result of contenders) if (result.status === 'rejected') expect(result.reason).toMatchObject({ code: 'CONFLICT' });
-        const winner = JSON.parse(await readFile(path.join(directory, 'server.lock'), 'utf8'));
-        expect(winner.pid).toBe(process.pid);
-        await expect(acquireLock(root, 0)).rejects.toMatchObject({ code: 'CONFLICT' });
-      } finally { await Promise.all(owners.map(owner => owner.value())); }
-    }
-  });
-
-  it('keeps an interrupted recovery guard intact instead of racing its replacement', async () => {
-    const root = await temporary();
-    const directory = path.join(root, 'local');
-    await mkdir(directory);
-    const bytes = JSON.stringify({ pid: deadPid, port: 0, token: 'synthetic-interrupted-recovery' }); // secret-scan: allow (synthetic lock-owner fixture, not a credential)
-    await writeFile(path.join(directory, 'server.lock'), bytes);
-    await writeFile(path.join(directory, 'server-recovery.lock'), bytes);
-    const contenders = await Promise.allSettled(Array.from({ length: 12 }, () => acquireLock(root, 0)));
-    expect(contenders.every(result => result.status === 'rejected' && result.reason.message.includes('server-recovery.lock'))).toBe(true);
-    expect(await readFile(path.join(directory, 'server.lock'), 'utf8')).toBe(bytes);
-    expect(await readFile(path.join(directory, 'server-recovery.lock'), 'utf8')).toBe(bytes);
-  });
-
-  it('makes release idempotent so an old release cannot delete a successor', async () => {
-    const root = await temporary();
-    const release = await acquireLock(root, 0);
-    await Promise.all([release(), release()]);
-    const successor = await acquireLock(root, 0);
-    cleanup.push(successor);
-    const current = await readFile(path.join(root, 'local/server.lock'), 'utf8');
-    await release();
-    expect(await readFile(path.join(root, 'local/server.lock'), 'utf8')).toBe(current);
-    await expect(acquireLock(root, 0)).rejects.toMatchObject({ code: 'CONFLICT' });
-  });
-});
+// The single-writer lock tests (one owner across simultaneous stale-lock recoveries, an interrupted recovery guard kept
+// intact, idempotent release) moved to @xuseak/local-app-kit (src/server-lock.test.ts) with the lock itself on 2026-10-22;
+// 'persists preferences across restart and prevents a second instance' above still proves the lock through startServer.
 
 describe('Time and Durable History', () => {
   it('does not replenish expired quota and creates a new action in the next cycle', () => {

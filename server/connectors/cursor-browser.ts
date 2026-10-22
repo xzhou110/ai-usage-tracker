@@ -3,8 +3,8 @@ import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { ObservationSchema, type Observation } from '../../shared/schema.ts';
-import { writeAtomic } from '../atomic.ts';
-import { AppError } from '../errors.ts';
+import { writeAtomic } from '@xuseak/local-app-kit/atomic-write';
+import { AppError, storageError } from '../errors.ts';
 
 export const extensionOrigin = /^chrome-extension:\/\/[a-p]{32}$/;
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -41,7 +41,8 @@ export class CursorBrowserBridge {
   }
   private async save(value: z.infer<typeof savedSchema>) {
     await mkdir(this.directory, { recursive: true });
-    await writeAtomic(this.file, JSON.stringify(savedSchema.parse(value)));
+    const result = await writeAtomic(this.file, JSON.stringify(savedSchema.parse(value)), { ifMatch: '*' });
+    if (!result.ok) throw storageError();
   }
   issuePairing() { return this.serial(async () => {
     const code = randomBytes(16).toString('hex');
