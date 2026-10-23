@@ -10,6 +10,7 @@ phase: polishing
 next: Reconcile the first Claude Desktop Code reading and the Cursor browser extension
 visibility: private
 repo_visibility: public
+icon: desktop/app-icon.svg
 ---
 
 # AI Usage Tracker

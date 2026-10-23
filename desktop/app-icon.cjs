@@ -1,4 +1,5 @@
 // Three quota bars on a navy tile. Generated locally, with no external assets.
+// app-icon.svg beside this file draws the same tile for the X Command Center card (PROJECT.md icon:); change both together.
 function createAppIcon(nativeImage) {
   const size = 32;
   const pixels = Buffer.alloc(size * size * 4);
