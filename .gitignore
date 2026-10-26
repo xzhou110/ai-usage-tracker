@@ -7,3 +7,6 @@ out/
 .env.*
 *.log
 *.tsbuildinfo
+
+# Assistant workflow files hold machine paths; the launcher reads them from disk, never from GitHub (2026-10-25)
+.claude/
