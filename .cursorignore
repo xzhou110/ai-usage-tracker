@@ -1,0 +1,6 @@
+# Cursor's native equivalent of the Claude Code deny-read rules: never index or read the private tiers.
+# Claude Code enforces the same rule in the user-level settings; Codex is locked out of local/ by a Windows
+# permission (agent-skills/scripts/codex-private-folder-block.mjs).
+local/
+private/
+out/
